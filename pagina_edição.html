@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zairis - edit</title>
+    <link rel="icon" href="imagens/Logo_iconZ.png">
+    <style>
+        /* ===== VARIÁVEIS ===== */
+        :root {
+            --primary-color: #d35d6e;
+            --secondary-color: #ff6b81;
+            --light-pink: #ffb6c1;
+            --background-color: #eed7dd;
+            --text-color: #555;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Playfair Display', serif;
+            background: white;
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ===== LAYOUT PRINCIPAL ===== */
+        .editor-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        .form-section {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .preview-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            position: sticky;
+            top: 20px;
+        }
+
+        /* ===== FORMULÁRIO EM CARD ===== */
+        .form-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light-pink);
+        }
+
+        .progress-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--light-pink);
+            z-index: 1;
+        }
+
+        .step-indicator {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--light-pink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+            font-size: 14px;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        .step-indicator.active {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-indicator.completed {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        /* ===== CONTEÚDO DOS PASSOS ===== */
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .step-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            border-bottom: 1px solid var(--light-pink);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(211, 93, 110, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* ===== UPLOAD DE IMAGEM ===== */
+        .image-upload {
+            border: 3px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 182, 193, 0.1);
+        }
+
+        .image-upload:hover {
+            border-color: var(--primary-color);
+            background: rgba(211, 93, 110, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 15px;
+            border-radius: 8px;
+            display: none;
+            border: 3px solid var(--white);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* ===== SELEÇÃO DE CORES ===== */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .color-option {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .color-option:hover {
+            transform: scale(1.05);
+        }
+
+        .color-option.selected {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+
+        .color-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* ===== OPÇÕES OPCIONAIS ===== */
+        .optional-section {
+            background: rgba(255, 182, 193, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .toggle-switch {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* ===== BOTÕES ===== */
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--light-pink);
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== PREVIEW EM CELULAR ===== */
+        .phone-mockup {
+            width: 375px;
+            background: #333;
+            border-radius: 40px;
+            padding: 20px 15px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .phone-screen {
+            background: var(--background-color);
+            background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 30%);
+            border-radius: 25px;
+            height: 700px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            scrollbar-width: none;
+        }
+
+        .phone-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 25px;
+            background: #333;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+
+        /* ===== CSS DO PREVIEW (SITE GERADO) ===== */
+        .preview-site {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 15px;
+            font-family: 'Julius Sans One', sans-serif;
+            animation: pulseBackground 8s infinite alternate;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        @keyframes pulseBackground {
+            0% { background-color: var(--background-color); }
+            100% { background-color: #f8e1e6; }
+        }
+
+        .card {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .image-container {
+            width: 90%;
+            height: 200px;
+            margin: 5% auto 0;
+            background: var(--preview-image) center/cover no-repeat;
+            border: 8px solid var(--white);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            transition: all 0.5s;
+        }
+        
+        .image-container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .title {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--white);
+            font-size: 20px;
+            text-align: center;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+            width: 90%;
+            font-weight: 400;
+            letter-spacing: 1px;
+            font-family: 'Dancing Script', cursive;
+        }
+        
+        .message {
+            padding: 15px;
+            color: var(--text-color);
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: center;
+            background: rgba(255,255,255,0.7);
+            border-radius: 0 0 15px 15px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        
+        .heart {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 20px;
+            color: var(--secondary-color);
+            animation: heartbeat 1.5s infinite;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .declarations {
+            width: 100%;
+            margin: 0 auto 20px;
+            padding: 0 15px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .declaration-card {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .declaration-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .declaration-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 22px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .declaration-title:after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(to right, var(--light-pink), var(--secondary-color));
+            margin: 8px auto;
+        }
+        
+        .declaration-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-color);
+            text-align: center;
+        }
+        
+        .carousel-container {
+            width: 100%;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        
+        .carousel-slide {
+            min-width: 100%;
+            position: relative;
+        }
+        
+        .carousel-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            border: 6px solid var(--white);
+            box-sizing: border-box;
+        }
+        
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px;
+            text-align: center;
+            font-family: 'Dancing Script', cursive;
+            font-size: 16px;
+            color: var(--primary-color);
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .carousel-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .section-divider {
+            width: 90%;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-family: 'Dancing Script', cursive;
+            font-size: 18px;
+        }
+        
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px dashed var(--light-pink);
+            margin: 0 10px;
+        }
+        
+        .plans-section {
+            width: 100%;
+            margin: 0 auto 15px;
+            padding: 0 15px;
+        }
+        
+        .plans-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .plan-item {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.5s;
+        }
+        
+        .plan-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .plan-icon {
+            font-size: 30px;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .plan-title {
+            font-family: 'Dancing Script', cursive;
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .plan-text {
+            font-family: 'Cormorant Garamond', serif;
+            color: var(--text-color);
+            line-height: 1.5;
+            font-size: 13px;
+        }
+        
+        .animated-message {
+            width: 100%;
+            margin: 0 auto 20px;
+            text-align: center;
+            font-family: 'Dancing Script', cursive;
+            font-size: 20px;
+            color: var(--primary-color);
+            height: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .message-text {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            animation: rotateMessage 15s infinite;
+        }
+        
+        @keyframes rotateMessage {
+            0% { opacity: 0; transform: translateY(15px); }
+            10% { opacity: 1; transform: translateY(0); }
+            20% { opacity: 1; transform: translateY(0); }
+            30% { opacity: 0; transform: translateY(-15px); }
+            100% { opacity: 0; transform: translateY(-15px); }
+        }
+        
+        .promises {
+            width: 100%;
+            margin: 0 auto 20px;
+            padding: 20px;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .promises-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .promise-item {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--light-pink);
+            position: relative;
+        }
+        
+        .promise-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .promise-item:before {
+            content: '❤';
+            color: var(--secondary-color);
+            margin-right: 8px;
+            font-size: 12px;
+        }
+        
+        .video-section {
+            background: var(--white);
+            width: 100%;
+            margin: 0 auto 20px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(224, 168, 168, 0.3);
+        }
+        
+        .video-wrapper {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .video-wrapper:hover {
+            transform: scale(1.02);
+        }
+        
+        .video-wrapper iframe {
+            width: 100%;
+            height: 180px;
+            display: block;
+            border: none;
+        }
+        
+        .video-message {
+            font-family: 'Dancing Script', cursive;
+            font-size: 18px;
+            color: var(--primary-color);
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .simple-counter {
+            width: 100%;
+            margin: 0 auto 20px;
+            text-align: center;
+            padding: 0 15px;
+        }
+        
+        .simple-counter p {
+            font-family: 'Dancing Script', cursive;
+            font-size: 18px;
+            color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .simple-counter span {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .music-control {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: var(--secondary-color);
+            color: var(--white);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .music-control:hover {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        /* ===== CAMPOS DINÂMICOS ===== */
+        .counter-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .counter-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .counter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .dynamic-fields {
+            margin-top: 15px;
+            border-top: 1px solid rgba(211, 93, 110, 0.3);
+            padding-top: 15px;
+        }
+
+        .field-group {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .field-group h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .carousel-image-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+            background: rgba(255, 182, 193, 0.1);
+        }
+
+        .carousel-preview {
+            max-width: 100%;
+            max-height: 100px;
+            border-radius: 5px;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .emoji-input {
+            font-size: 24px;
+            text-align: center;
+            max-width: 60px;
+        }
+
+        .promise-item-editor {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .promise-input {
+            flex: 1;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .add-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .add-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 1024px) {
+            .editor-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .form-section {
+                max-width: 100%;
+                order: 1;
+            }
+            
+            .preview-section {
+                order: 2;
+                position: static;
+            }
+            
+            .phone-mockup {
+                width: 100%;
+                max-width: 375px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .form-card {
+                padding: 20px;
+            }
+            
+            .phone-mockup {
+                padding: 15px 10px;
+            }
+            
+            .phone-screen {
+                height: 600px;
+            }
+            
+            .progress-steps {
+                margin-bottom: 20px;
+            }
+            
+            .step-indicator {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-card {
+                padding: 15px;
+            }
+            
+            .phone-screen {
+                height: 500px;
+            }
+            
+            .color-palette {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .step-content h3 {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Dancing+Script:wght@400;700&family=Julius+Sans+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Seção do Formulário -->
+        <div class="form-section">
+            <div class="form-card">
+                <div class="progress-header">
+                    <h2>Criar Seu Site de Amor</h2>
+                    <p>Passo <span id="current-step">1</span> de <span id="total-steps">8</span></p>
+                </div>
+
+                <div class="progress-steps">
+                    <div class="step-indicator active" data-step="1">1</div>
+                    <div class="step-indicator" data-step="2">2</div>
+                    <div class="step-indicator" data-step="3">3</div>
+                    <div class="step-indicator" data-step="4">4</div>
+                    <div class="step-indicator" data-step="5">5</div>
+                    <div class="step-indicator" data-step="6">6</div>
+                    <div class="step-indicator" data-step="7">7</div>
+                    <div class="step-indicator" data-step="8">8</div>
+                </div>
+
+                <!-- Passo 1: Informações Básicas -->
+                <div class="step-content active" id="step-1">
+                    <h3>Informações Básicas</h3>
+                    
+                    <div class="form-group">
+                        <label for="pageName" class="required">Nome do Site (URL)</label>
+                        <input type="text" id="pageName" class="form-control" placeholder="Ex: nosso-amor"  maxlength="30">
+                        <div class="error-message" id="pageNameError">Por favor, insira um nome para o site</div>
+                        <small style="color: #666;">URL: lovesite.com/<strong id="url-preview">nosso-amor</strong></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mainTitle" class="required">Título Principal</label>
+                        <input type="text" id="mainTitle" class="form-control" placeholder="Ex: Para Minha Princesa" maxlength="50">
+                        <div class="error-message" id="mainTitleError">Por favor, insira um título principal</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mainMessage" class="required">Mensagem Principal</label>
+                        <textarea id="mainMessage" class="form-control" placeholder="Escreva aqui tudo o que sente..." maxlength="500"></textarea>
+                        <div class="error-message" id="mainMessageError">Por favor, escreva uma mensagem principal</div>
+                        <small style="color: #666;"><span id="mainMessageCount">0</span>/500 caracteres</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="startDate">Data do Início (Opcional)</label>
+                        <input type="date" id="startDate" class="form-control" value="2022-02-25">
+                        <small style="color: #666;">Esta data será usada no contador de tempo juntos</small>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <div></div>
+                        <button class="btn btn-primary" onclick="validateStep1()">Próximo →</button>
+                    </div>
+                </div>
+
+                <!-- Passo 2: Imagem Principal -->
+                <div class="step-content" id="step-2">
+                    <h3>Imagem Principal</h3>
+                    
+                    <div class="form-group">
+                        <label for="mainImage">Foto do Casal</label>
+                        <div class="image-upload" id="mainImageUpload">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p>Clique para escolher uma imagem</p>
+                            <img id="mainImagePreview" class="image-preview" src="" alt="Prévia da imagem">
+                        </div>
+                        <input type="file" id="mainImageInput" accept="image/*" class="hidden">
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(1)">← Voltar</button>
+                        <button class="btn btn-primary" onclick="nextStep(3)">Próximo →</button>
+                    </div>
+                </div>
+
+                <!-- Passo 3: Declarações -->
+                <div class="step-content" id="step-3">
+                    <h3>Declarações de Amor</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Adicionar Declarações</label>
+                            <label class="switch">
+                                <input type="checkbox" id="declarationsToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="declarationsFields">
+                            <div class="counter-controls">
+                                <span>Quantas declarações?</span>
+                                <button class="counter-btn active" data-count="1">1</button>
+                                <button class="counter-btn" data-count="2">2</button>
+                                <button class="counter-btn" data-count="3">3</button>
+                                <button class="counter-btn" data-count="4">4</button>
+                            </div>
+                            
+                            <div id="declarationFieldsContainer">
+                                <!-- Campos dinâmicos serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(2)">← Voltar</button>
+                        <button class="btn btn-primary" onclick="nextStep(4)">Próximo →</button>
+                    </div>
+                </div>
+
+                <!-- Passo 4: Carrossel -->
+                <div class="step-content" id="step-4">
+                    <h3>Carrossel de Fotos</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Adicionar Carrossel</label>
+                            <label class="switch">
+                                <input type="checkbox" id="carouselToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="carouselFields">
+                            <div class="toggle-switch">
+                                <label>Mostrar Legendas</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="carouselCaptionsToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="counter-controls">
+                                <span>Quantas fotos?</span>
+                                <button class="counter-btn active" data-count="3">3</button>
+                                <button class="counter-btn" data-count="4">4</button>
+                                <button class="counter-btn" data-count="5">5</button>
+                                <button class="counter-btn" data-count="6">6</button>
+                                <button class="counter-btn" data-count="8">8</button>
+                            </div>
+                            
+                            <div id="carouselImagesContainer">
+                                <!-- Campos do carrossel serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(3)">← Voltar</button>
+                        <button class="btn btn-primary" onclick="nextStep(5)">Próximo →</button>
+                    </div>
+                </div>
+
+                <!-- Passo 5: Planos e Promessas -->
+                <div class="step-content" id="step-5">
+                    <h3>Planos e Promessas</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Nossos Planos</label>
+                            <label class="switch">
+                                <input type="checkbox" id="plansToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="plansFields">
+                            <div class="form-group">
+                                <label>Título da Seção</label>
+                                <input type="text" class="form-control" id="plansTitle" value="Nossos Planos" maxlength="30">
+                            </div>
+                            
+                            <div class="counter-controls">
+                                <span>Quantos planos?</span>
+                                <button class="counter-btn active" data-count="1">1</button>
+                                <button class="counter-btn" data-count="2">2</button>
+                                <button class="counter-btn" data-count="3">3</button>
+                            </div>
+                            
+                            <div id="plansContainer">
+                                <!-- Campos de planos serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Promessas de Amor</label>
+                            <label class="switch">
+                                <input type="checkbox" id="promisesToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="promisesFields">
+                            <div class="form-group">
+                                <label>Título das Promessas</label>
+                                <input type="text" class="form-control" id="promisesTitle" value="Minhas Promessas" maxlength="30">
+                            </div>
+                            
+                            <div id="promisesContainer">
+                                <!-- Promessas serão inseridas aqui -->
+                            </div>
+                            <button type="button" class="add-btn" onclick="addPromise()">
+                                <i class="fas fa-plus"></i> Adicionar Promessa
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(4)">← Voltar</button>
+                        <button class="btn btn-primary" onclick="nextStep(6)">Próximo →</button>
+                    </div>
+                </div>
+
+                <!-- Passo 6: Elementos Extras -->
+                <div class="step-content" id="step-6">
+                    <h3>Elementos Extras</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Vídeo Personalizado</label>
+                            <label class="switch">
+                                <input type="checkbox" id="videoToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="videoFields">
+                            <div class="form-group">
+                                <label>URL do Vídeo (YouTube)</label>
+                                <input type="text" class="form-control" id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+                                <small style="color: #666;">Cole o link do YouTube aqui</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Mensagem do Vídeo</label>
+                                <input type="text" class="form-control" id="videoMessage" value="Te vejo no altar" maxlength="50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Música de Fundo</label>
+                            <label class="switch">
+                                <input type="checkbox" id="musicToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="musicFields">
+                            <div class="form-group">
+                                <label>URL da Música (YouTube)</label>
+                                <input type="text" class="form-control" id="musicUrl" placeholder="https://www.youtube.com/watch?v=...">
+                                <small style="color: #666;">Cole o link do YouTube da música</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(5)">← Voltar</button>
+                        <button class="btn btn-primary" onclick="nextStep(7)">Próximo →</button>
+                    </div>
+                </div>
+
+                <!-- Passo 7: Cores e Finalização -->
+                <div class="step-content" id="step-7">
+                    <h3>Personalizar Cores</h3>
+                    
+                    <div class="form-group">
+                        <label>Cor de Fundo do Site</label>
+                        <div class="color-palette">
+                            <div class="color-option selected" style="background-color: #eed7dd;" data-color="#eed7dd"></div>
+                            <div class="color-option" style="background-color: #f8e1e6;" data-color="#f8e1e6"></div>
+                            <div class="color-option" style="background-color: #fff5f7;" data-color="#fff5f7"></div>
+                            <div class="color-option" style="background-color: #fce4ec;" data-color="#fce4ec"></div>
+                            <div class="color-option" style="background-color: #f8bbd9;" data-color="#f8bbd9"></div>
+                            <div class="color-option" style="background-color: #e1bee7;" data-color="#e1bee7"></div>
+                            <div class="color-option" style="background-color: #d1c4e9;" data-color="#d1c4e9"></div>
+                            <div class="color-option" style="background-color: #c5cae9;" data-color="#c5cae9"></div>
+                            <div class="color-option" style="background-color: #bbdefb;" data-color="#bbdefb"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cor dos Elementos (Botões, Títulos)</label>
+                        <div class="color-palette">
+                            <div class="color-option selected" style="background-color: #d35d6e;" data-color="#d35d6e"></div>
+                            <div class="color-option" style="background-color: #ff6b81;" data-color="#ff6b81"></div>
+                            <div class="color-option" style="background-color: #e84393;" data-color="#e84393"></div>
+                            <div class="color-option" style="background-color: #fd79a8;" data-color="#fd79a8"></div>
+                            <div class="color-option" style="background-color: #e66767;" data-color="#e66767"></div>
+                            <div class="color-option" style="background-color: #ff9ff3;" data-color="#ff9ff3"></div>
+                            <div class="color-option" style="background-color: #f368e0;" data-color="#f368e0"></div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(6)">← Voltar</button>
+                        <button class="btn btn-success" onclick="publicarDeclaracao()">
+                            <i class="fas fa-rocket"></i> Finalizar e Publicar Site
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção do Preview -->
+        <div class="preview-section">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="phone-screen" id="phoneScreen">
+                    <!-- Preview será gerado aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado completo do site
+        const siteData = {
+            pageName: "nosso-amor",
+            mainTitle: "Para Minha Princesa", 
+            mainImage: "",
+            mainMessage: "Oi, meu amor. Fiz esse site para guardar um pouquinho da gente. Aqui tem as nossas memórias, momentos e tudo o que faz nosso amor ser tão especial. Espero que você sinta, em cada detalhe, o quanto eu te amo.",
+            startDate: "2022-02-25",
+            backgroundColor: "#eed7dd",
+            primaryColor: "#d35d6e",
+            elements: {
+                declarations: true,
+                declarationsCount: 1,
+                carousel: true,
+                carouselCount: 3,
+                carouselCaptions: true,
+                plans: true,
+                plansCount: 1,
+                plansTitle: "Nossos Planos",
+                promises: true,
+                promisesTitle: "Minhas Promessas",
+                video: false,
+                videoUrl: "",
+                videoMessage: "Te vejo no altar",
+                music: true,
+                musicUrl: "",
+                counter: true
+            },
+            declarations: [
+                {
+                    title: "Meu Tudo",
+                    text: "Não importa quantas vidas eu viva, em todas elas, eu te escolheria sem hesitar. Você é meu hoje, meu amanhã e todo o sempre que vier depois."
+                }
+            ],
+            carouselImages: [
+                { src: "", caption: "Minha Princesa" },
+                { src: "", caption: "Minha Vida" },
+                { src: "", caption: "Meu Amor" }
+            ],
+            plans: [
+                { icon: "🏡", title: "Nossa Casa", text: "Em breve vamos morar juntinhos. Nosso lar será cheio de amor, carinho e momentos inesquecíveis." }
+            ],
+            promises: [
+                "Prometo te amar em todos os seus dias, bons e ruins",
+                "Prometo ser seu porto seguro em todas as tempestades", 
+                "Prometo lembrar todos os dias o quanto você é amada",
+                "Prometo construir mil sonhos ao seu lado",
+                "Prometo que nosso amor será nossa maior aventura"
+            ],
+            animatedMessages: [
+                "Você é o amor da minha vida",
+                "Cada dia ao seu lado é um presente",
+                "Meu coração bate mais forte por você", 
+                "Nada se compara ao seu amor",
+                "Eternamente grato por ter você"
+            ]
+        };
+
+        // Navegação entre passos
+        let currentStep = 1;
+        const totalSteps = 7;
+
+        function updateStepIndicators() {
+            document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+                const step = index + 1;
+                indicator.classList.remove('active', 'completed');
+                
+                if (step === currentStep) {
+                    indicator.classList.add('active');
+                } else if (step < currentStep) {
+                    indicator.classList.add('completed');
+                }
+            });
+            
+            document.getElementById('current-step').textContent = currentStep;
+            document.getElementById('total-steps').textContent = totalSteps;
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`step-${step}`).classList.add('active');
+            currentStep = step;
+            updateStepIndicators();
+            updatePreview();
+        }
+
+        function nextStep(step) {
+            saveCurrentStep();
+            showStep(step);
+        }
+
+        function previousStep(step) {
+            showStep(step);
+        }
+
+        // Validação do passo 1
+        function validateStep1() {
+            const pageName = document.getElementById('pageName').value.trim();
+            const mainTitle = document.getElementById('mainTitle').value.trim();
+            const mainMessage = document.getElementById('mainMessage').value.trim();
+            let isValid = true;
+
+            // Limpar erros anteriores
+            document.querySelectorAll('.error-message').forEach(error => {
+                error.style.display = 'none';
+            });
+
+            if (!pageName) {
+                document.getElementById('pageNameError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!mainTitle) {
+                document.getElementById('mainTitleError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!mainMessage) {
+                document.getElementById('mainMessageError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (isValid) {
+                nextStep(2);
+            }
+        }
+
+        // Navegação por clique nos indicadores
+        document.querySelectorAll('.step-indicator').forEach(indicator => {
+            indicator.addEventListener('click', function() {
+                const step = parseInt(this.getAttribute('data-step'));
+                if (step <= currentStep) {
+                    showStep(step);
+                }
+            });
+        });
+
+        // Salvar dados do passo atual
+        function saveCurrentStep() {
+            switch(currentStep) {
+                case 1:
+                    siteData.pageName = document.getElementById('pageName').value;
+                    siteData.mainTitle = document.getElementById('mainTitle').value;
+                    siteData.mainMessage = document.getElementById('mainMessage').value;
+                    siteData.startDate = document.getElementById('startDate').value;
+                    break;
+                case 3:
+                    siteData.elements.declarations = document.getElementById('declarationsToggle').checked;
+                    if (siteData.elements.declarations) {
+                        const titles = document.querySelectorAll('.declaration-title');
+                        const texts = document.querySelectorAll('.declaration-text');
+                        siteData.declarations = [];
+                        for (let i = 0; i < titles.length; i++) {
+                            if (titles[i].value.trim() && texts[i].value.trim()) {
+                                siteData.declarations.push({
+                                    title: titles[i].value,
+                                    text: texts[i].value
+                                });
+                            }
+                        }
+                    }
+                    break;
+                case 4:
+                    siteData.elements.carousel = document.getElementById('carouselToggle').checked;
+                    siteData.elements.carouselCaptions = document.getElementById('carouselCaptionsToggle').checked;
+                    if (siteData.elements.carousel) {
+                        const captions = document.querySelectorAll('.carousel-caption');
+                        siteData.carouselImages = [];
+                        for (let i = 0; i < captions.length; i++) {
+                            siteData.carouselImages.push({
+                                src: siteData.carouselImages[i]?.src || "",
+                                caption: captions[i].value
+                            });
+                        }
+                    }
+                    break;
+                case 5:
+                    siteData.elements.plans = document.getElementById('plansToggle').checked;
+                    siteData.elements.plansTitle = document.getElementById('plansTitle').value;
+                    siteData.elements.promises = document.getElementById('promisesToggle').checked;
+                    siteData.elements.promisesTitle = document.getElementById('promisesTitle').value;
+                    
+                    if (siteData.elements.plans) {
+                        const emojis = document.querySelectorAll('.plan-emoji');
+                        const titles = document.querySelectorAll('.plan-title');
+                        const texts = document.querySelectorAll('.plan-text');
+                        siteData.plans = [];
+                        for (let i = 0; i < emojis.length; i++) {
+                            if (titles[i].value.trim() && texts[i].value.trim()) {
+                                siteData.plans.push({
+                                    icon: emojis[i].value,
+                                    title: titles[i].value,
+                                    text: texts[i].value
+                                });
+                            }
+                        }
+                    }
+                    
+                    if (siteData.elements.promises) {
+                        const promiseInputs = document.querySelectorAll('.promise-input');
+                        siteData.promises = [];
+                        promiseInputs.forEach(input => {
+                            if (input.value.trim()) {
+                                siteData.promises.push(input.value.trim());
+                            }
+                        });
+                    }
+                    break;
+                case 6:
+                    siteData.elements.video = document.getElementById('videoToggle').checked;
+                    siteData.elements.videoUrl = document.getElementById('videoUrl').value;
+                    siteData.elements.videoMessage = document.getElementById('videoMessage').value;
+                    siteData.elements.music = document.getElementById('musicToggle').checked;
+                    siteData.elements.musicUrl = document.getElementById('musicUrl').value;
+                    break;
+                case 7:
+                    // Cores são salvas automaticamente
+                    break;
+            }
+        }
+
+        // Upload de imagem principal
+        document.getElementById('mainImageUpload').addEventListener('click', () => {
+            document.getElementById('mainImageInput').click();
+        });
+
+        document.getElementById('mainImageInput').addEventListener('change', function(e) {
+            handleImageUpload(e, 'mainImage');
+        });
+
+        // Função genérica para upload de imagens
+        function handleImageUpload(event, type, index = null) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (type === 'mainImage') {
+                        siteData.mainImage = e.target.result;
+                        document.getElementById('mainImagePreview').src = siteData.mainImage;
+                        document.getElementById('mainImagePreview').style.display = 'block';
+                    } else if (type === 'carousel' && index !== null) {
+                        siteData.carouselImages[index].src = e.target.result;
+                        document.getElementById(`carousel-preview-${index}`).src = e.target.result;
+                        document.getElementById(`carousel-preview-${index}`).style.display = 'block';
+                    }
+                    updatePreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Seleção de cores
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const color = this.getAttribute('data-color');
+                const isBackground = color.startsWith('#ee') || color.startsWith('#f8') || color.startsWith('#ff') || color.startsWith('#fc') || color.startsWith('#e1') || color.startsWith('#d1') || color.startsWith('#c5') || color.startsWith('#bb');
+                
+                if (isBackground) {
+                    // É cor de fundo
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        if (opt.getAttribute('data-color').startsWith('#ee') || opt.getAttribute('data-color').startsWith('#f8') || opt.getAttribute('data-color').startsWith('#ff') || opt.getAttribute('data-color').startsWith('#fc') || opt.getAttribute('data-color').startsWith('#e1') || opt.getAttribute('data-color').startsWith('#d1') || opt.getAttribute('data-color').startsWith('#c5') || opt.getAttribute('data-color').startsWith('#bb')) {
+                            opt.classList.remove('selected');
+                        }
+                    });
+                    siteData.backgroundColor = color;
+                } else {
+                    // É cor principal
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        if (!opt.getAttribute('data-color').startsWith('#ee') && !opt.getAttribute('data-color').startsWith('#f8') && !opt.getAttribute('data-color').startsWith('#ff') && !opt.getAttribute('data-color').startsWith('#fc') && !opt.getAttribute('data-color').startsWith('#e1') && !opt.getAttribute('data-color').startsWith('#d1') && !opt.getAttribute('data-color').startsWith('#c5') && !opt.getAttribute('data-color').startsWith('#bb')) {
+                            opt.classList.remove('selected');
+                        }
+                    });
+                    siteData.primaryColor = color;
+                }
+                
+                this.classList.add('selected');
+                updatePreview();
+            });
+        });
+
+        // Controles de quantidade
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('counter-btn')) {
+                const container = e.target.closest('.counter-controls');
+                const count = parseInt(e.target.dataset.count);
+                const section = container.closest('.optional-section');
+                const type = section.querySelector('label').textContent.trim();
+                
+                // Atualizar botões ativos
+                container.querySelectorAll('.counter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                
+                // Atualizar dados e campos
+                if (type.includes('Declarações')) {
+                    siteData.elements.declarationsCount = count;
+                    updateDeclarationFields();
+                } else if (type.includes('Carrossel')) {
+                    siteData.elements.carouselCount = count;
+                    updateCarouselFields();
+                } else if (type.includes('Planos')) {
+                    siteData.elements.plansCount = count;
+                    updatePlanFields();
+                }
+                
+                updatePreview();
+            }
+        });
+
+        // Atualizar campos de declarações
+        function updateDeclarationFields() {
+            const container = document.getElementById('declarationFieldsContainer');
+            const count = siteData.elements.declarationsCount;
+            
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const existingData = siteData.declarations[i] || { title: `Declaração ${i+1}`, text: 'Escreva sua declaração de amor aqui...' };
+                
+                container.innerHTML += `
+                    <div class="field-group">
+                        <h4>Declaração ${i+1}</h4>
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" class="form-control declaration-title" value="${existingData.title}" maxlength="30">
+                        </div>
+                        <div class="form-group">
+                            <label>Texto</label>
+                            <textarea class="form-control declaration-text" maxlength="200">${existingData.text}</textarea>
+                            <small style="color: #666;">Máximo 200 caracteres</small>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Atualizar campos do carrossel
+        function updateCarouselFields() {
+            const container = document.getElementById('carouselImagesContainer');
+            const count = siteData.elements.carouselCount;
+            
+            container.innerHTML = '';
+            
+            const defaultCaptions = ["Minha Princesa", "Minha Vida", "Meu Amor", "Minha Neném", "Minha Melhor Amiga", "Minha Futura Esposa", "Meu Primeiro Amor", "Eu Te Amo"];
+            
+            for (let i = 0; i < count; i++) {
+                const existingData = siteData.carouselImages[i] || { src: "", caption: defaultCaptions[i] || `Foto ${i+1}` };
+                
+                container.innerHTML += `
+                    <div class="field-group">
+                        <h4>Foto ${i+1}</h4>
+                        <div class="carousel-image-upload" onclick="document.getElementById('carousel-input-${i}').click()">
+                            <div class="upload-icon">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <p>Clique para adicionar foto ${i+1}</p>
+                            <img id="carousel-preview-${i}" class="carousel-preview" src="${existingData.src}" alt="Prévia da imagem">
+                        </div>
+                        <input type="file" id="carousel-input-${i}" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'carousel', ${i})">
+                        <div class="form-group">
+                            <label>Legenda da Foto</label>
+                            
+                    </div>
+                `;
+            }
+        }
+
+        // Atualizar campos de planos
+        function updatePlanFields() {
+            const container = document.getElementById('plansContainer');
+            const count = siteData.elements.plansCount;
+            
+            container.innerHTML = '';
+            
+            const defaultPlans = [
+                { icon: "🏡", title: "Nossa Casa", text: "Em breve vamos morar juntinhos. Nosso lar será cheio de amor, carinho e momentos inesquecíveis." },
+                { icon: "✈️", title: "Viagens", text: "Vamos descobrir o mundo de mãos dadas, colecionando memórias e criando histórias únicas." },
+                { icon: "👨‍👩‍👧‍👦", title: "Família", text: "Vamos construir uma família linda, grande e unida, onde o amor e o respeito sejam a base." }
+            ];
+            
+            for (let i = 0; i < count; i++) {
+                const existingData = siteData.plans[i] || defaultPlans[i] || { icon: "❤️", title: `Plano ${i+1}`, text: 'Descreva seu plano especial...' };
+                
+                container.innerHTML += `
+                    <div class="field-group">
+                        <h4>Plano ${i+1}</h4>
+                        <div class="form-group">
+                            <label>Emoji</label>
+                            <input type="text" class="form-control plan-emoji emoji-input" value="${existingData.icon}" maxlength="2">
+                        </div>
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" class="form-control plan-title" value="${existingData.title}" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <textarea class="form-control plan-text" maxlength="100">${existingData.text}</textarea>
+                            <small style="color: #666;">Máximo 100 caracteres</small>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Gerenciar promessas
+        function updatePromiseFields() {
+            const container = document.getElementById('promisesContainer');
+            container.innerHTML = '';
+            
+            siteData.promises.forEach((promise, index) => {
+                container.innerHTML += `
+                    <div class="promise-item-editor">
+                        <input type="text" class="form-control promise-input" value="${promise}" placeholder="Digite uma promessa..." maxlength="60">
+                        <button type="button" class="remove-btn" onclick="removePromise(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function addPromise() {
+            siteData.promises.push("Nova promessa...");
+            updatePromiseFields();
+            updatePreview();
+        }
+
+        function removePromise(index) {
+            siteData.promises.splice(index, 1);
+            updatePromiseFields();
+            updatePreview();
+        }
+
+        // Calcular tempo juntos
+        function calculateTimeTogether() {
+            if (!siteData.startDate) return { years: 0, months: 0, days: 0 };
+            
+            const startDate = new Date(siteData.startDate);
+            const now = new Date();
+            
+            let years = now.getFullYear() - startDate.getFullYear();
+            let months = now.getMonth() - startDate.getMonth();
+            let days = now.getDate() - startDate.getDate();
+            
+            if (days < 0) {
+                months--;
+                days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+            }
+            
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            return { years, months, days };
+        }
+
+        // Atualizar preview COMPLETO
+        function updatePreview() {
+            const screen = document.getElementById('phoneScreen');
+            const secondaryColor = siteData.primaryColor === '#d35d6e' ? '#ff6b81' : 
+                                 siteData.primaryColor === '#ff6b81' ? '#e84393' : 
+                                 siteData.primaryColor === '#e84393' ? '#fd79a8' : '#ff6b81';
+            const lightPink = siteData.primaryColor === '#d35d6e' ? '#ffb6c1' : '#f8bbd9';
+            
+            // Aplicar variáveis CSS
+            document.documentElement.style.setProperty('--primary-color', siteData.primaryColor);
+            document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+            document.documentElement.style.setProperty('--light-pink', lightPink);
+            document.documentElement.style.setProperty('--background-color', siteData.backgroundColor);
+            
+            const timeTogether = calculateTimeTogether();
+            
+            let previewHTML = `
+                <div class="preview-site">
+                    <!-- Card Principal -->
+                    <div class="card">
+                        <div class="image-container" style="background: ${siteData.mainImage ? `url('${siteData.mainImage}')` : lightPink} center/cover no-repeat;"></div>
+                        <div class="title-container">
+                            <h1 class="title">${siteData.mainTitle}</h1>
+                        </div>
+                        <p class="message">
+                            ${siteData.mainMessage.replace(/\n/g, '<br>')}
+                        </p>
+                        <div class="heart">❤</div>
+                    </div>
+            `;
+
+            // Declarações
+            if (siteData.elements.declarations && siteData.declarations.length > 0) {
+                previewHTML += `
+                    <section class="declarations">
+                        ${siteData.declarations.map(declaration => `
+                            <div class="declaration-card">
+                                <h2 class="declaration-title">${declaration.title}</h2>
+                                <p class="declaration-text">${declaration.text}</p>
+                            </div>
+                        `).join('')}
+                    </section>
+                `;
+            }
+
+            // Carrossel - CORRIGIDO
+            if (siteData.elements.carousel && siteData.carouselImages.length > 0) {
+                previewHTML += `
+                    <div class="carousel-container">
+                        <div class="carousel">
+                            ${siteData.carouselImages.map((img, i) => `
+                                <div class="carousel-slide">
+                                    <img src="${img.src || 'https://via.placeholder.com/300x200/ffb6c1/ffffff?text=Foto+' + (i+1)}" alt="${img.caption}" class="carousel-image">
+                                    ${siteData.elements.carouselCaptions ? `<div class="carousel-caption">${img.caption}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="carousel-btn" style="left: 10px;">❮</button>
+                        <button class="carousel-btn" style="right: 10px;">❯</button>
+                    </div>
+                `;
+            }
+
+            // Planos
+            if (siteData.elements.plans && siteData.plans.length > 0) {
+                previewHTML += `
+                    <div class="section-divider">${siteData.elements.plansTitle}</div>
+                    <div class="plans-section">
+                        <div class="plans-grid">
+                            ${siteData.plans.map(plan => `
+                                <div class="plan-item visible">
+                                    <div class="plan-icon">${plan.icon}</div>
+                                    <h3 class="plan-title">${plan.title}</h3>
+                                    <p class="plan-text">${plan.text}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Mensagens Animadas
+            previewHTML += `
+                <div class="animated-message">
+                    ${siteData.animatedMessages.map((msg, index) => `
+                        <div class="message-text" style="animation-delay: ${index * 3}s;">${msg}</div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Promessas
+            if (siteData.elements.promises && siteData.promises.length > 0) {
+                previewHTML += `
+                    <section class="promises">
+                        <h2 class="promises-title">${siteData.elements.promisesTitle}</h2>
+                        ${siteData.promises.map(promise => `
+                            <div class="promise-item">${promise}</div>
+                        `).join('')}
+                    </section>
+                `;
+            }
+
+            // Vídeo - CORRIGIDO
+            if (siteData.elements.video && siteData.elements.videoUrl) {
+                const videoId = extractYouTubeId(siteData.elements.videoUrl);
+                if (videoId) {
+                    previewHTML += `
+                        <div class="section-divider">Nossos Momentos</div>
+                        <div class="video-section">
+                            <div class="video-wrapper">
+                                <iframe 
+                                    width="100%" 
+                                    height="180" 
+                                    src="https://www.youtube.com/embed/${videoId}" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowfullscreen>
+                                </iframe>
+                                <p class="video-message">${siteData.elements.videoMessage}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Contador
+            if (siteData.elements.counter && siteData.startDate) {
+                previewHTML += `
+                    <div class="simple-counter">
+                        <p>Nós nos conhecemos há <span>${timeTogether.years}</span> anos, <span>${timeTogether.months}</span> meses e <span>${timeTogether.days}</span> dias ❤️</p>
+                    </div>
+                `;
+            }
+
+            // Controle de Música - DENTRO DO PREVIEW
+            if (siteData.elements.music) {
+                previewHTML += `
+                    <button class="music-control" style="background: ${siteData.primaryColor};">♪</button>
+                `;
+            }
+
+            previewHTML += `</div>`;
+            screen.innerHTML = previewHTML;
+
+            // Inicializar carrossel
+            if (siteData.elements.carousel) {
+                initCarousel();
+            }
+
+            // Inicializar animação dos planos
+            initPlanAnimation();
+        }
+
+        // Extrair ID do YouTube
+        function extractYouTubeId(url) {
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length === 11) ? match[7] : false;
+        }
+
+        // Inicializar carrossel
+        function initCarousel() {
+            const carousel = document.querySelector('.carousel');
+            const slides = document.querySelectorAll('.carousel-slide');
+            const prevBtn = document.querySelector('.carousel-btn:nth-child(2)');
+            const nextBtn = document.querySelector('.carousel-btn:nth-child(3)');
+            
+            if (!carousel || !slides.length) return;
+            
+            let currentIndex = 0;
+            
+            function updateCarousel() {
+                carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+            
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % slides.length;
+                updateCarousel();
+            }
+            
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+                updateCarousel();
+            }
+            
+            if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+            if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+            
+            // Auto-advance
+            setInterval(nextSlide, 5000);
+        }
+
+        // Inicializar animação dos planos
+        function initPlanAnimation() {
+            const planItems = document.querySelectorAll('.plan-item');
+            planItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('visible');
+                }, index * 200);
+            });
+        }
+
+        // Função para publicar a declaração
+async function publicarDeclaracao() {
+    try {
+        // 1. Salvar todos os dados atuais
+        saveCurrentStep();
+        
+        // 2. Validação final
+        if (!siteData.pageName || !siteData.mainTitle || !siteData.mainMessage) {
+            alert('❌ Preencha pelo menos: Nome do Site, Título e Mensagem Principal');
+            showStep(1);
+            return;
+        }
+
+        // 3. Mostrar loading no botão
+        const btnFinalizar = document.querySelector('.btn-success');
+        const originalText = btnFinalizar.innerHTML;
+        btnFinalizar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
+        btnFinalizar.disabled = true;
+
+        console.log('Enviando dados:', siteData);
+
+        // 4. Enviar para a API
+        const response = await fetch('/api/criarDeclaracao', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(siteData)
+        });
+
+        const result = await response.json();
+        console.log('Resposta da API:', result);
+
+        // 5. Verificar resultado
+        if (result.success) {
+            // ✅ SUCESSO
+            const mensagemSucesso = `🎉 Declaração publicada com sucesso!\n\n🔗 Link: ${result.link}\n\n📱 Compartilhe este link com seu amor! ❤️\n\nDica: O link é único e permanente!`;
+            
+            alert(mensagemSucesso);
+            
+            // Copiar link automaticamente
+            try {
+                await navigator.clipboard.writeText(result.link);
+                console.log('✅ Link copiado para área de transferência!');
+            } catch (err) {
+                console.log('ℹ️ Não foi possível copiar o link automaticamente');
+            }
+            
+            // Redirecionar para a página criada
+            setTimeout(() => {
+                window.location.href = result.link;
+            }, 2000);
+            
+        } else {
+            // ❌ ERRO
+            alert(`❌ Erro ao publicar: ${result.error || 'Erro desconhecido'}`);
+        }
+
+    } catch (error) {
+        // ❌ ERRO DE CONEXÃO
+        console.error('Erro ao publicar:', error);
+        alert('❌ Erro ao conectar com o servidor. Verifique sua internet e tente novamente.');
+    } finally {
+        // 6. Restaurar botão (em caso de erro)
+        const btnFinalizar = document.querySelector('.btn-success');
+        if (btnFinalizar) {
+            btnFinalizar.innerHTML = '<i class="fas fa-rocket"></i> Finalizar e Publicar Site';
+            btnFinalizar.disabled = false;
+        }
+    }
+}
+
+        // Event listeners para atualização em tempo real
+        document.getElementById('pageName').addEventListener('input', function() {
+            siteData.pageName = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+            document.getElementById('url-preview').textContent = siteData.pageName;
+            updatePreview();
+        });
+
+        document.getElementById('mainTitle').addEventListener('input', function() {
+            siteData.mainTitle = this.value;
+            updatePreview();
+        });
+
+        document.getElementById('mainMessage').addEventListener('input', function() {
+            siteData.mainMessage = this.value;
+            document.getElementById('mainMessageCount').textContent = this.value.length;
+            updatePreview();
+        });
+
+        document.getElementById('startDate').addEventListener('change', function() {
+            siteData.startDate = this.value;
+            updatePreview();
+        });
+
+        document.getElementById('plansTitle').addEventListener('input', function() {
+            siteData.elements.plansTitle = this.value;
+            updatePreview();
+        });
+
+        document.getElementById('promisesTitle').addEventListener('input', function() {
+            siteData.elements.promisesTitle = this.value;
+            updatePreview();
+        });
+
+        // Toggles em tempo real
+        const toggles = [
+            'declarationsToggle', 'carouselToggle', 'carouselCaptionsToggle', 
+            'plansToggle', 'promisesToggle', 'videoToggle', 'musicToggle'
+        ];
+        
+        toggles.forEach(toggleId => {
+            const element = document.getElementById(toggleId);
+            if (element) {
+                element.addEventListener('change', function() {
+                    const elementKey = toggleId.replace('Toggle', '');
+                    siteData.elements[elementKey] = this.checked;
+                    updatePreview();
+                });
+            }
+        });
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStepIndicators();
+            updateDeclarationFields();
+            updateCarouselFields();
+            updatePlanFields();
+            updatePromiseFields();
+            updatePreview();
+            
+            // Inicializar contador de caracteres
+            document.getElementById('mainMessageCount').textContent = siteData.mainMessage.length;
+        });
+    </script>
+</body>
+</html>
