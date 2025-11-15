@@ -1,0 +1,3880 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zairis - Editor de Site de Amor</title>
+    <link rel="icon" href="imagens/Logo_iconZ.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Dancing+Script:wght@400;700&family=Julius+Sans+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* SEU CSS ORIGINAL AQUI - MANTIDO INTACTO */
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #ff6b81;
+            --light-pink: #ffb6c1;
+            --background-color: #eed7dd;
+            --text-color: #555;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --medium-gray: #e9ecef;
+            --dark-gray: #495057;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: white;
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #eed7dd 100%);
+        }
+
+        .editor-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        .form-section {
+            flex: 1 1 500px;
+            min-width: 300px;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            order: 1;
+        }
+
+        .preview-section {
+            flex: 1 1 500px;
+            min-width: 300px;
+            display: flex;
+            justify-content: center;
+            position: sticky;
+            top: 20px;
+            order: 2;
+        }
+
+        @media (max-width: 1024px) {
+            .preview-section {
+                position: static;
+                order: 2;
+            }
+
+            
+            .form-section {
+                flex: 0 1 100%;
+                max-width: 100%;
+                order: 2;
+            }
+        }
+
+        .form-header {
+            background: var(--white);
+            color: var(--primary-color);
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-header h2 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .form-header p {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        .form-body {
+            padding: 30px;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--medium-gray);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-title i {
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-gray);
+            font-size: 0.95rem;
+        }
+
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: var(--white);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .image-upload {
+            border: 2px dashed var(--medium-gray);
+            border-radius: 8px;
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 182, 193, 0.1);
+        }
+
+        .image-upload:hover {
+            border-color: var(--primary-color);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 15px;
+            border-radius: 8px;
+            display: none;
+            border: 3px solid var(--white);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-option {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .color-option:hover {
+            transform: scale(1.05);
+        }
+
+        .color-option.selected {
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .color-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .optional-section {
+            background: rgba(255, 182, 193, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .toggle-switch {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: var(--medium-gray);
+            color: var(--dark-gray);
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--primary-color);
+            color: white;
+            padding: 14px 25px;
+        }
+
+        .btn-success:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .counter-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .counter-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--medium-gray);
+            background: white;
+            color: var(--dark-gray);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .counter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .dynamic-fields {
+            margin-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding-top: 15px;
+        }
+
+        .field-group {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .field-group h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .multiple-image-upload {
+            border: 2px dashed var(--medium-gray);
+            border-radius: 8px;
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 182, 193, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .multiple-image-upload:hover {
+            border-color: var(--primary-color);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preview-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .remove-image-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .add-image-btn {
+            width: 80px;
+            height: 80px;
+            border: 2px dashed var(--medium-gray);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 182, 193, 0.1);
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .add-image-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .upload-info {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .emoji-input {
+            font-size: 24px;
+            text-align: center;
+            max-width: 60px;
+        }
+
+        .promise-item-editor {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .promise-input {
+            flex: 1;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .add-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .add-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(255, 182, 193, 0.05);
+            border-radius: 8px;
+            border: 1px solid var(--medium-gray);
+        }
+
+        .color-picker {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .color-picker:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .color-picker:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .color-info {
+            flex: 1;
+        }
+
+        .color-code {
+            display: inline-block;
+            padding: 8px 12px;
+            background: var(--white);
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--dark-gray);
+            min-width: 80px;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .color-hint {
+            color: var(--dark-gray);
+            font-size: 0.85rem;
+            display: block;
+        }
+        
+        .optional-section.url-valid {
+            border-left-color: #28a745 !important;
+            background: rgba(40, 167, 69, 0.1) !important;
+        }
+
+        .optional-section.url-invalid {
+            border-left-color: #dc3545 !important;
+            background: rgba(220, 53, 69, 0.1) !important;
+        }
+
+        .url-status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .url-status.valid {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .url-status.invalid {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .iphone-15-mockup {
+            width: 100%;
+            max-width: 390px;
+            height: auto;
+            aspect-ratio: 390 / 735;
+            background: rgba(0, 0, 0, 0.653);
+            border-radius: 50px;
+            padding: 10px;
+            box-shadow: 
+                0 25px 60px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2),
+                inset 0 -1px 0 rgba(0,0,0,0.3);
+            position: relative;
+            border: 1px solid #444;
+            margin: 0 auto;
+        }
+
+        .iphone-frame {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 42px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 
+                inset 0 0 0 1px rgba(255,255,255,0.1),
+                0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .iphone-screen {
+            background: var(--background-color);
+            background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 30%);
+            border-radius: 36px;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            scrollbar-width: none;
+        }
+
+        .iphone-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        .dynamic-island {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 35px;
+            background: #000;
+            border-radius: 25px;
+            z-index: 20;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .dynamic-island::before {
+            content: '';
+            position: absolute;
+            width: 90%;
+            height: 60%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+        }
+
+        .dynamic-island span {
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .iphone-button {
+            position: absolute;
+            background: #5d5d60;
+            border-radius: 2px;
+            z-index: 5;
+        }
+
+        .volume-up {
+            top: 120px;
+            right: -3px;
+            width: 3px;
+            height: 40px;
+        }
+
+        .volume-down {
+            top: 170px;
+            right: -3px;
+            width: 3px;
+            height: 40px;
+        }
+
+        .power-button {
+            top: 120px;
+            left: -3px;
+            width: 3px;
+            height: 80px;
+        }
+
+        .preview-site {
+            position: relative;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 60px 15px 15px;
+            font-family: 'Julius Sans One', sans-serif;
+            width: 100%;
+            font-size: clamp(12px, 2vw, 14px);
+        }
+
+        @keyframes pulseBackground {
+            0% { background-color: var(--background-color); }
+            100% { background-color: #f8e1e6; }
+        }
+
+        .card {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
+            margin-bottom: 50px;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .image-container {
+            width: 85%;
+            aspect-ratio: 243 / 329;
+            height: auto;
+            margin: 10% auto 0;
+            background: var(--preview-image) center/cover no-repeat;
+            border: 12px solid var(--white);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            transition: all 0.5s;
+            margin-bottom: 35px;
+        }
+        
+        .image-container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .title {
+                position: absolute;
+                top: 15%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-size: clamp(15px, 5vw, 20px);
+                text-align: center;
+                text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+                width: 90%;
+                font-weight: 400;
+                letter-spacing: 1px;
+                /* CORREÇÃO: Adicionar quebra de palavras longas */
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                word-break: break-word;
+                hyphens: auto;
+        }
+        
+        .message {
+            padding: 0px 15px 15px;
+            color: #555;
+            font-size: clamp(13px, 3vw, 15px);
+            line-height: 1.6;
+            text-align: center;
+            margin-top: 0px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0 0 15px 15px;
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .heart {
+            position: absolute;
+            bottom: 0px;
+            right: 2px;
+            font-size: 16px;
+            color: var(--secondary-color);
+            animation: heartbeat 1.5s infinite;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .declarations {
+            width: 100%;
+            margin: 0 auto 20px;
+            padding: 0 15px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .declaration-card {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .declaration-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .declaration-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(18px, 4vw, 22px);
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+            position: relative;
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .declaration-title:after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(to right, var(--light-pink), var(--secondary-color));
+            margin: 8px auto;
+        }
+        
+        .declaration-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(12px, 3vw, 14px);
+            line-height: 1.6;
+            color: var(--text-color);
+            text-align: center;
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .carousel-container {
+            width: 100%;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        
+        .carousel-slide {
+            min-width: 100%;
+            position: relative;
+        }
+        
+        .carousel-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            border: 6px solid var(--white);
+            box-sizing: border-box;
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .carousel-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .section-divider {
+            width: 90%;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(16px, 4vw, 18px);
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px dashed var(--light-pink);
+            margin: 0 10px;
+        }
+        
+        .plans-section {
+            width: 100%;
+            margin: 0 auto 15px;
+            padding: 0 15px;
+        }
+        
+        .plans-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .plan-item {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.5s;
+        }
+        
+        .plan-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .plan-icon {
+            font-size: clamp(24px, 6vw, 30px);
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .plan-title {
+            font-family: 'Dancing Script', cursive;
+            color: var(--primary-color);
+            font-size: clamp(16px, 4vw, 18px);
+            margin-bottom: 8px;
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .plan-text {
+            font-family: 'Cormorant Garamond', serif;
+            color: var(--text-color);
+            line-height: 1.5;
+            font-size: clamp(12px, 3vw, 13px);
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .animated-message {
+            width: 100%;
+            margin: 0 auto 20px;
+            text-align: center;
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(18px, 4vw, 20px);
+            color: var(--primary-color);
+            height: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .message-text {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            animation: rotateMessage 15s infinite;
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        @keyframes rotateMessage {
+            0% { opacity: 0; transform: translateY(15px); }
+            10% { opacity: 1; transform: translateY(0); }
+            20% { opacity: 1; transform: translateY(0); }
+            30% { opacity: 0; transform: translateY(-15px); }
+            100% { opacity: 0; transform: translateY(-15px); }
+        }
+        
+        .promises {
+            width: 100%;
+            margin: 0 auto 20px;
+            padding: 20px;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .promises-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(20px, 5vw, 24px);
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .promise-item {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(12px, 3vw, 14px);
+            color: var(--text-color);
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--light-pink);
+            position: relative;
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .promise-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .promise-item:before {
+            content: '❤';
+            color: var(--secondary-color);
+            margin-right: 8px;
+            font-size: 12px;
+        }
+        
+        .video-section {
+            background: var(--white);
+            width: 100%;
+            margin: 0 auto 20px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(224, 168, 168, 0.3);
+        }
+        
+        .video-wrapper {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            background: #000;
+        }
+
+        .video-wrapper:hover {
+            transform: scale(1.02);
+        }
+
+        .video-wrapper iframe {
+            width: 100%;
+            height: 180px;
+            display: block;
+            border: none;
+        }
+
+        .video-error, .music-error {
+            border: 1px solid #f5c6cb;
+        }
+
+        .video-placeholder, .music-placeholder {
+            border: 2px dashed #dee2e6;
+        }
+
+        .music-status {
+            border: 1px solid #c3e6cb;
+        }
+        
+        .video-message {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(16px, 4vw, 18px);
+            color: var(--primary-color);
+            text-align: center;
+            margin-top: 10px;
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .simple-counter {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        .simple-counter p {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(18px, 4vw, 22px);
+            color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 40px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            /* CORREÇÃO: Adicionar quebra de palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        .simple-counter span {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .preview-music-control {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: var(--primary-color);
+            color: var(--white);
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+            border: none;
+            transition: all 0.3s;
+            font-family: Arial, sans-serif;
+        }
+
+        .preview-music-control:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        /* CORREÇÃO GLOBAL: Adicionar quebra de palavras para todos os elementos de texto */
+        .form-control, 
+        .declaration-title, 
+        .declaration-text, 
+        .plan-title, 
+        .plan-text, 
+        .promise-item,
+        .video-message,
+        .simple-counter p,
+        .section-divider,
+        .message,
+        .title {
+            /* Propriedades para quebrar palavras longas */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        /* NOVOS ESTILOS PARA AS MELHORIAS */
+        .validation-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+            padding: 8px 12px;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .modal-content p {
+            color: var(--dark-gray);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .color-picker-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .color-picker {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .color-code {
+                font-size: 0.9rem;
+                padding: 6px 10px;
+            }
+            body {
+                padding: 10px;
+            }
+            
+                .form-section {
+                max-width: 100%;
+            }
+            
+            .form-body {
+                padding: 20px 15px;
+            }
+            
+            .form-header {
+                padding: 20px 15px;
+            }
+            
+            .form-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .step-title {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .iphone-15-mockup {
+                padding: 8px;
+                border-radius: 40px;
+            }
+            
+            .iphone-frame {
+                border-radius: 34px;
+            }
+            
+            .iphone-screen {
+                border-radius: 30px;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+            }
+            
+            .preview-music-control {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1rem;
+                bottom: 8px;
+                left: 8px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .color-picker-container {
+                padding: 12px;
+            }
+            
+            .color-picker {
+                width: 45px;
+                height: 45px;
+            }
+
+            .iphone-15-mockup {
+                max-width: 320px;
+                border-radius: 40px;
+                padding: 8px;
+            }
+            
+            .iphone-frame {
+                border-radius: 34px;
+            }
+            
+            .iphone-screen {
+                border-radius: 30px;
+            }
+
+            .form-body {
+                padding: 15px 10px;
+            }
+            
+            .color-palette {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .step-title {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .form-header {
+                padding: 15px 10px;
+            }
+            
+            .form-header h2 {
+                font-size: 1.2rem;
+            }
+            
+            .preview-music-control {
+                width: 2rem;
+                height: 2rem;
+                font-size: 0.9rem;
+                bottom: 6px;
+                left: 6px;
+            }
+        }
+
+        /* ============================================= */
+        /* ESTILOS DO CARROSSEL MELHORADO */
+        /* ============================================= */
+
+        .carousel-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .carousel-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .carousel-message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .carousel-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .carousel-indicators .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-indicators .indicator.active {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.2);
+        }
+
+        .preview-thumb {
+            transition: transform 0.2s ease;
+        }
+
+        .preview-thumb:hover {
+            transform: scale(1.05);
+        }
+
+        .image-counter {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Melhorias para mobile */
+        @media (max-width: 768px) {
+            .carousel-btn {
+                padding: 12px 15px;
+                font-size: 18px;
+            }
+            
+            .preview-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+            
+            .preview-thumb {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .add-image-btn {
+                width: 70px;
+                height: 70px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .preview-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+            
+            .preview-thumb {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .add-image-btn {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .carousel-message {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal para restauração de edição -->
+    <div id="restoreModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3>Continuar edição?</h3>
+            <p>Encontramos uma edição anterior não finalizada. Deseja continuar de onde parou?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="restoreNo">Não, começar do zero</button>
+                <button class="btn btn-primary" id="restoreYes">Sim, continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-container">
+        <!-- Seção do Formulário -->
+        <div class="form-section">
+            <div class="form-header">
+                <h2>Criar Site Especial</h2>
+                <p>Para mãe, amigos, casais e todos os relacionamentos</p>
+            </div>
+            
+            <div class="form-body">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 8.33%"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>Passo <span id="current-step">1</span> de <span id="total-steps">12</span></span>
+                        <span id="progress-percent">8%</span>
+                    </div>
+                </div>
+
+                <!-- Passo 1: URL -->
+                <div class="step-content active" id="step-1">
+                    <h3 class="step-title"><i class="fas fa-link"></i> URL do Site</h3>
+
+                    <div class="form-group">
+                        <label for="pageName" class="required">Nome do Site (URL)</label>
+                        <input type="text" id="pageName" class="form-control" placeholder="Ex: nossa-amizade" maxlength="15" required>
+                        <div class="validation-message" id="pageNameError">Por favor, preencha este campo antes de continuar.</div>
+                        <small style="color: var(--dark-gray);">URL: zairis.com/<strong id="url-preview">nossa-amizade</strong></small>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <div></div>
+                        <button class="btn btn-primary" onclick="nextStep(2)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 2: Imagem Principal -->
+                <div class="step-content" id="step-2">
+                    <h3 class="step-title"><i class="fas fa-image"></i> Imagem Principal</h3>
+
+                    <div class="form-group">
+                        <label for="mainImage">Foto Especial</label>
+                        <div class="image-upload" id="mainImageUpload">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p>Clique para escolher uma imagem</p>
+                            <img id="mainImagePreview" class="image-preview" src="" alt="Prévia da imagem">
+                        </div>
+                        <input type="file" id="mainImageInput" accept="image/*" class="hidden">
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(1)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(3)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 3: Título Principal -->
+                <div class="step-content" id="step-3">
+                    <h3 class="step-title"><i class="fas fa-heading"></i> Título Principal</h3>
+
+                    <div class="form-group">
+                        <label for="mainTitle" class="required">Título Principal</label>
+                        <input type="text" id="mainTitle" class="form-control" placeholder="Ex: Para o Meu Amor" maxlength="25" required>
+                        <div class="validation-message" id="mainTitleError">Por favor, preencha este campo antes de continuar.</div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(2)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(4)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 4: Texto Principal -->
+                <div class="step-content" id="step-4">
+                    <h3 class="step-title"><i class="fas fa-file-alt"></i> Texto Principal</h3>
+
+                    <div class="form-group">
+                        <label for="mainMessage" class="required">Mensagem Principal</label>
+                        <textarea id="mainMessage" class="form-control" placeholder="Escreva aqui tudo o que sente..." maxlength="500" required></textarea>
+                        <div class="validation-message" id="mainMessageError">Por favor, preencha este campo antes de continuar.</div>
+                        <small style="color: var(--dark-gray);"><span id="mainMessageCount">0</span>/500 caracteres</small>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(3)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(5)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 5: Declarações -->
+                <div class="step-content" id="step-5">
+                    <h3 class="step-title"><i class="fas fa-heart"></i> Declarações</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Adicionar Declarações</label>
+                            <label class="switch">
+                                <input type="checkbox" id="declarationsToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="declarationsFields">
+                            <div class="counter-controls">
+                                <span>Quantas declarações?</span>
+                                <button class="counter-btn active" data-count="1">1</button>
+                                <button class="counter-btn" data-count="2">2</button>
+                                <button class="counter-btn" data-count="3">3</button>
+                                <button class="counter-btn" data-count="4">4</button>
+                            </div>
+                            
+                            <div id="declarationFieldsContainer">
+                                <!-- Campos dinâmicos serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(4)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(6)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 6: Carrossel -->
+                <div class="step-content" id="step-6">
+                    <h3 class="step-title"><i class="fas fa-images"></i> Carrossel de Imagens</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Adicionar Carrossel</label>
+                            <label class="switch">
+                                <input type="checkbox" id="carouselToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="carouselFields">
+                            <div class="form-group">
+                                <label>Selecionar Fotos (mínimo 3)</label>
+                                <div class="multiple-image-upload" id="carouselMultipleUpload">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-images"></i>
+                                    </div>
+                                    <p>Clique para selecionar múltiplas fotos</p>
+                                    <p class="upload-info">Selecione pelo menos 3 imagens</p>
+                                    <div class="preview-grid" id="carouselPreviewGrid">
+                                        <div class="add-image-btn" id="addCarouselImages">
+                                            <i class="fas fa-plus"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="file" id="carouselMultipleInput" accept="image/*" multiple class="hidden">
+                                <div class="validation-message" id="carouselError">
+                                    Por favor, selecione pelo menos 3 imagens
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(5)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(7)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 7: Planos -->
+                <div class="step-content" id="step-7">
+                    <h3 class="step-title"><i class="fas fa-star"></i> Planos</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Adicionar Planos</label>
+                            <label class="switch">
+                                <input type="checkbox" id="plansToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="plansFields">
+                            <div class="form-group">
+                                <label>Título da Seção</label>
+                                <input type="text" class="form-control" id="plansTitle" value="Nossos Planos" maxlength="50">
+                            </div>
+                            
+                            <div class="counter-controls">
+                                <span>Quantos planos?</span>
+                                <button class="counter-btn active" data-count="1">1</button>
+                                <button class="counter-btn" data-count="2">2</button>
+                                <button class="counter-btn" data-count="3">3</button>
+                            </div>
+                            
+                            <div id="plansContainer">
+                                <!-- Campos de planos serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(6)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(8)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 8: Promessas -->
+                <div class="step-content" id="step-8">
+                    <h3 class="step-title"><i class="fas fa-handshake"></i> Promessas</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Adicionar Promessas</label>
+                            <label class="switch">
+                                <input type="checkbox" id="promisesToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="promisesFields">
+                            <div class="form-group">
+                                <label>Título das Promessas</label>
+                                <input type="text" class="form-control" id="promisesTitle" value="Minhas Promessas" maxlength="20">
+                            </div>
+                            
+                            <div id="promisesContainer">
+                                <!-- Promessas serão inseridas aqui -->
+                            </div>
+                            <button type="button" class="add-btn" onclick="addPromise()">
+                                <i class="fas fa-plus"></i> Adicionar Promessa
+                                <span id="promiseCounter">(0/10)</span> <!-- Contador adicionado -->
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(7)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(9)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 9: Vídeo e Música -->
+                <div class="step-content" id="step-9">
+                    <h3 class="step-title"><i class="fas fa-play-circle"></i> Vídeo e Música</h3>
+                    
+                    <div class="optional-section" id="videoFields">
+                        <div class="toggle-switch">
+                            <label>Vídeo Personalizado</label>
+                            <label class="switch">
+                                <input type="checkbox" id="videoToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields">
+                            <div class="form-group">
+                                <label>URL do Vídeo (YouTube)</label>
+                                <input type="text" class="form-control" id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+                                <small style="color: var(--dark-gray);">Cole o link do YouTube aqui</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Mensagem do Vídeo</label>
+                                <input type="text" class="form-control" id="videoMessage" value="Nossos Momentos" maxlength="50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="optional-section" id="musicFields">
+                        <div class="toggle-switch">
+                            <label>Música de Fundo</label>
+                            <label class="switch">
+                                <input type="checkbox" id="musicToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields">
+                            <div class="form-group">
+                                <label>URL da Música (YouTube)</label>
+                                <input type="text" class="form-control" id="musicUrl" placeholder="https://www.youtube.com/watch?v=...">
+                                <small style="color: var(--dark-gray);">Cole o link do YouTube da música</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(8)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(10)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 10: Contador de Tempo -->
+                <div class="step-content" id="step-10">
+                    <h3 class="step-title"><i class="fas fa-clock"></i> Tempo Juntos</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Adicionar Contador de Tempo</label>
+                            <label class="switch">
+                                <input type="checkbox" id="counterToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="counterFields">
+                            <div class="form-group">
+                                <label>Texto do Contador</label>
+                                <input type="text" class="form-control" id="counterText" value="Nós nos conhecemos há" maxlength="50" oninput="updatePreview()">
+                                <small style="color: var(--dark-gray);">Texto que aparece antes do contador</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Data de Início</label>
+                                <input type="date" class="form-control" id="counterDate" onchange="updatePreview()">
+                                <small style="color: var(--dark-gray);">Data em que se conheceram/iniciaram o relacionamento</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(9)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(11)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 11: Efeito de Pétalas -->
+                <div class="step-content" id="step-11">
+                    <h3 class="step-title"><i class="fas fa-magic"></i> Efeito Especial</h3>
+                    
+                    <div class="optional-section">
+                        <div class="toggle-switch">
+                            <label>Ativar Efeito de Pétalas</label>
+                            <label class="switch">
+                                <input type="checkbox" id="petalsToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="dynamic-fields" id="petalsFields">
+                            <div class="form-group">
+                                <label>Emoji para o Efeito</label>
+                                <input type="text" class="form-control emoji-input" id="petalsEmoji" value="🌸" maxlength="2" oninput="updatePreview()">
+                                <small style="color: var(--dark-gray);">Escolha um emoji: ❤️, 🌸, 💫, 🦋, ✨, etc.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(10)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep(12)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Passo 12: Cores -->
+                <div class="step-content" id="step-12">
+                    <h3 class="step-title"><i class="fas fa-palette"></i> Cores</h3>
+                    
+                    <div class="form-group">
+                        <label for="backgroundColorPicker">Cor de Fundo do Site</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="backgroundColorPicker" class="color-picker" value="#eed7dd" 
+                                oninput="updateBackgroundColor(this.value)">
+                            <div class="color-info">
+                                <span class="color-code" id="backgroundColorCode">#eed7dd</span>
+                                <small class="color-hint">Clique no quadrado para escolher uma cor</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primaryColorPicker">Cor dos Elementos (Botões, Títulos)</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="primaryColorPicker" class="color-picker" value="#000000" 
+                                oninput="updatePrimaryColor(this.value)">
+                            <div class="color-info">
+                                <span class="color-code" id="primaryColorCode">#000000</span>
+                                <small class="color-hint">Clique no quadrado para escolher uma cor</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep(11)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button class="btn btn-success" onclick="handleSubmit()">
+                            <i class="fas fa-rocket"></i> Finalizar e Salvar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção do Preview com iPhone 15 -->
+        <div class="preview-section">
+            <div class="iphone-15-mockup">
+                <div class="iphone-frame">
+                    <div class="dynamic-island">
+                    
+                    </div>
+                    <div class="iphone-screen" id="phoneScreen">
+                        <!-- Preview será gerado aqui -->
+                    </div>
+                </div>
+                <div class="iphone-button volume-up"></div>
+                <div class="iphone-button volume-down"></div>
+                <div class="iphone-button power-button"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // MÓDULO PRINCIPAL - ESTADO E CONFIGURAÇÃO
+        // =============================================
+        
+        // Estado completo do site
+        const siteData = {
+            pageName: "",
+            mainImage: "",
+            mainTitle: "", 
+            mainMessage: "",
+            startDate: "",
+            backgroundColor: "#eed7dd",
+            primaryColor: "#000000",
+            elements: {
+                declarations: true,
+                declarationsCount: 1,
+                carousel: true,
+                carouselCount: 3,
+                plans: true,
+                plansCount: 1,
+                plansTitle: "Nossos Planos",
+                promises: true,
+                promisesTitle: "Minhas Promessas",
+                video: false,
+                videoUrl: "",
+                videoMessage: "Nossos Momentos",
+                music: true,
+                musicUrl: "",
+                counter: true,
+                counterText: "Nós nos conhecemos há",
+                petals: false,
+                petalsEmoji: "🌸"
+            },
+            declarations: [
+                { title: "", text: "" }
+            ],
+            carouselImages: [],
+            plans: [
+                { icon: "❤️", title: "", text: "" }
+            ],
+            promises: [
+                ""
+            ],
+        };
+
+        // Configuração de navegação
+        let currentStep = 1;
+        const totalSteps = 12;
+
+        // Variáveis para controle dos efeitos
+        let petalsInterval = null;
+        let isMusicPlaying = false;
+        let musicIframe = null;
+
+        // Cache de elementos DOM
+        const domCache = {};
+
+        // =============================================
+        // MÓDULO DE VALIDAÇÃO OBRIGATÓRIA
+        // =============================================
+
+        // Função otimizada para validação de campos obrigatórios
+        function validateRequiredField(inputElement, errorElement) {
+            const value = inputElement.value.trim();
+            const isValid = value !== '';
+            
+            if (!isValid) {
+                showValidationError(errorElement);
+            } else {
+                hideValidationError(errorElement);
+            }
+            
+            return isValid;
+        }
+
+        function showValidationError(errorElement) {
+            errorElement.style.display = 'block';
+            setTimeout(() => {
+                errorElement.style.opacity = '1';
+            }, 10);
+        }
+
+        function hideValidationError(errorElement) {
+            errorElement.style.opacity = '0';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 300);
+        }
+
+        // Validação centralizada por passo
+        function validateCurrentStep() {
+            const stepValidators = {
+                1: () => validateRequiredField(
+                    getCachedElement('pageName'), 
+                    getCachedElement('pageNameError')
+                ),
+                3: () => validateRequiredField(
+                    getCachedElement('mainTitle'), 
+                    getCachedElement('mainTitleError')
+                ),
+                4: () => validateRequiredField(
+                    getCachedElement('mainMessage'), 
+                    getCachedElement('mainMessageError')
+                ),
+                6: () => {
+                    if (siteData.elements.carousel && siteData.carouselImages.length < 3) {
+                        showValidationError(getCachedElement('carouselError'));
+                        return false;
+                    }
+                    hideValidationError(getCachedElement('carouselError'));
+                    return true;
+                }
+            };
+            
+            return stepValidators[currentStep] ? stepValidators[currentStep]() : true;
+        }
+
+        // =============================================
+        // MÓDULO DE CACHE E PERFORMANCE
+        // =============================================
+
+        // Cache otimizado de elementos DOM
+        function getCachedElement(id) {
+            if (!domCache[id]) {
+                domCache[id] = document.getElementById(id);
+            }
+            return domCache[id];
+        }
+
+        // Função otimizada para atualização em lote
+        function batchUpdatePreview() {
+            requestAnimationFrame(updatePreview);
+        }
+
+        // =============================================
+        // MÓDULO DE SALVAMENTO AUTOMÁTICO
+        // =============================================
+
+        const STORAGE_KEY = 'zairis-site-editor-autosave';
+
+        // Salvar estado automaticamente
+        function autoSave() {
+            try {
+                const saveData = {
+                    siteData: siteData,
+                    currentStep: currentStep,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+            } catch (error) {
+                console.warn('Não foi possível salvar automaticamente:', error);
+            }
+        }
+
+        // Restaurar estado salvo
+        function restoreSavedData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const { siteData: savedData, currentStep: savedStep } = JSON.parse(saved);
+                    
+                    // Restaurar dados principais
+                    Object.assign(siteData, savedData);
+                    
+                    // Restaurar UI
+                    restoreUIFromData();
+                    
+                    return { success: true, step: savedStep };
+                }
+            } catch (error) {
+                console.warn('Erro ao restaurar dados salvos:', error);
+            }
+            
+            return { success: false };
+        }
+
+        // Restaurar interface a partir dos dados
+        function restoreUIFromData() {
+            // Restaurar campos básicos
+            getCachedElement('pageName').value = siteData.pageName || '';
+            getCachedElement('mainTitle').value = siteData.mainTitle || '';
+            getCachedElement('mainMessage').value = siteData.mainMessage || '';
+            getCachedElement('mainMessageCount').textContent = siteData.mainMessage?.length || 0;
+            getCachedElement('url-preview').textContent = siteData.pageName || 'nossa-amizade';
+            
+            // Restaurar cores
+            getCachedElement('backgroundColorPicker').value = siteData.backgroundColor;
+            getCachedElement('backgroundColorCode').textContent = siteData.backgroundColor;
+            getCachedElement('primaryColorPicker').value = siteData.primaryColor;
+            getCachedElement('primaryColorCode').textContent = siteData.primaryColor;
+            
+            // Restaurar toggles
+            const toggleMap = {
+                'declarationsToggle': 'declarations',
+                'carouselToggle': 'carousel',
+                'plansToggle': 'plans',
+                'promisesToggle': 'promises',
+                'videoToggle': 'video',
+                'musicToggle': 'music',
+                'counterToggle': 'counter',
+                'petalsToggle': 'petals'
+            };
+            
+            Object.entries(toggleMap).forEach(([toggleId, dataKey]) => {
+                const element = getCachedElement(toggleId);
+                if (element) {
+                    element.checked = !!siteData.elements[dataKey];
+                }
+            });
+            
+            // Restaurar campos específicos
+            getCachedElement('plansTitle').value = siteData.elements.plansTitle || '';
+            getCachedElement('promisesTitle').value = siteData.elements.promisesTitle || '';
+            getCachedElement('videoUrl').value = siteData.elements.videoUrl || '';
+            getCachedElement('videoMessage').value = siteData.elements.videoMessage || '';
+            getCachedElement('musicUrl').value = siteData.elements.musicUrl || '';
+            getCachedElement('counterText').value = siteData.elements.counterText || '';
+            getCachedElement('counterDate').value = siteData.startDate || '';
+            getCachedElement('petalsEmoji').value = siteData.elements.petalsEmoji || '';
+            
+            // Restaurar componentes dinâmicos
+            updateDeclarationFields();
+            updatePlanFields();
+            updatePromiseFields();
+            updateCarouselPreview();
+            
+            // Atualizar preview
+            batchUpdatePreview();
+        }
+
+        // Limpar dados salvos
+        function clearSavedData() {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+
+        // Modal de restauração
+        function showRestoreModal() {
+            const modal = getCachedElement('restoreModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function hideRestoreModal() {
+            const modal = getCachedElement('restoreModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // =============================================
+        // MÓDULO DE NAVEGAÇÃO OTIMIZADO
+        // =============================================
+
+        function showStep(step) {
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const targetStep = getCachedElement(`step-${step}`);
+            if (targetStep) {
+                targetStep.classList.add('active');
+                currentStep = step;
+                updateProgressBar();
+                batchUpdatePreview();
+            }
+        }
+
+        function nextStep(step) {
+            if (validateCurrentStep()) {
+                saveCurrentStep();
+                autoSave(); // Salvar automaticamente ao avançar
+                showStep(step);
+            }
+        }
+
+        function previousStep(step) {
+            saveCurrentStep();
+            autoSave(); // Salvar automaticamente ao voltar
+            showStep(step);
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            getCachedElement('progress-fill').style.width = `${progress}%`;
+            getCachedElement('progress-percent').textContent = `${Math.round(progress)}%`;
+            getCachedElement('current-step').textContent = currentStep;
+            getCachedElement('total-steps').textContent = totalSteps;
+        }
+
+        // =============================================
+        // MÓDULO DE GERENCIAMENTO DE DADOS OTIMIZADO
+        // =============================================
+
+        function saveCurrentStep() {
+            const stepSavers = {
+                1: () => siteData.pageName = getCachedElement('pageName').value,
+                3: () => siteData.mainTitle = getCachedElement('mainTitle').value,
+                4: () => siteData.mainMessage = getCachedElement('mainMessage').value,
+                5: () => {
+                    siteData.elements.declarations = getCachedElement('declarationsToggle').checked;
+                    if (siteData.elements.declarations) {
+                        const titles = document.querySelectorAll('.declaration-title');
+                        const texts = document.querySelectorAll('.declaration-text');
+                        siteData.declarations = Array.from(titles).map((title, i) => ({
+                            title: title.value,
+                            text: texts[i]?.value || ""
+                        }));
+                    }
+                },
+                6: () => {
+                    siteData.elements.carousel = getCachedElement('carouselToggle').checked;
+                    if (siteData.elements.carousel) {
+                        validateCarouselCount();
+                    }
+                },
+                7: () => {
+                    siteData.elements.plans = getCachedElement('plansToggle').checked;
+                    siteData.elements.plansTitle = getCachedElement('plansTitle').value;
+                    if (siteData.elements.plans) {
+                        const icons = document.querySelectorAll('.plan-emoji');
+                        const titles = document.querySelectorAll('.plan-title');
+                        const texts = document.querySelectorAll('.plan-text');
+                        siteData.plans = Array.from(icons).map((icon, i) => ({
+                            icon: icon.value || "❤️",
+                            title: titles[i]?.value || "",
+                            text: texts[i]?.value || ""
+                        }));
+                    }
+                },
+                8: () => {
+                    siteData.elements.promises = getCachedElement('promisesToggle').checked;
+                    siteData.elements.promisesTitle = getCachedElement('promisesTitle').value;
+                    if (siteData.elements.promises) {
+                        const promiseInputs = document.querySelectorAll('.promise-input');
+                        siteData.promises = Array.from(promiseInputs).map(input => input.value);
+                    }
+                },
+                9: () => {
+                    siteData.elements.video = getCachedElement('videoToggle').checked;
+                    siteData.elements.videoUrl = getCachedElement('videoUrl').value;
+                    siteData.elements.videoMessage = getCachedElement('videoMessage').value;
+                    siteData.elements.music = getCachedElement('musicToggle').checked;
+                    siteData.elements.musicUrl = getCachedElement('musicUrl').value;
+                },
+                10: () => {
+                    siteData.elements.counter = getCachedElement('counterToggle').checked;
+                    siteData.elements.counterText = getCachedElement('counterText').value;
+                    siteData.startDate = getCachedElement('counterDate').value;
+                },
+                11: () => {
+                    siteData.elements.petals = getCachedElement('petalsToggle').checked;
+                    siteData.elements.petalsEmoji = getCachedElement('petalsEmoji').value;
+                }
+            };
+            
+            if (stepSavers[currentStep]) {
+                stepSavers[currentStep]();
+            }
+        }
+
+        // =============================================
+        // FUNÇÕES PARA VÍDEO E MÚSICA (OTIMIZADAS)
+        // =============================================
+
+        function extractYouTubeId(url) {
+            if (!url) return null;
+            
+            const trimmedUrl = url.trim();
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?#]+)/,
+                /youtube\.com\/watch\?.*v=([^&?#]+)/,
+                /youtu\.be\/([^&?#]+)/,
+                /youtube\.com\/v\/([^&?#]+)/
+            ];
+            
+            for (const pattern of patterns) {
+                const match = trimmedUrl.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            
+            return null;
+        }
+
+        function validateVideoUrl() {
+            const videoUrl = getCachedElement('videoUrl').value;
+            const videoId = extractYouTubeId(videoUrl);
+            const videoFields = getCachedElement('videoFields');
+            
+            videoFields.classList.remove('url-valid', 'url-invalid');
+            
+            if (videoUrl.trim() === '') return;
+            
+            if (videoId) {
+                videoFields.classList.add('url-valid');
+            } else {
+                videoFields.classList.add('url-invalid');
+            }
+        }
+
+        function validateMusicUrl() {
+            const musicUrl = getCachedElement('musicUrl').value;
+            const musicId = extractYouTubeId(musicUrl);
+            const musicFields = getCachedElement('musicFields');
+            
+            musicFields.classList.remove('url-valid', 'url-invalid');
+            
+            if (musicUrl.trim() === '') return;
+            
+            if (musicId) {
+                musicFields.classList.add('url-valid');
+            } else {
+                musicFields.classList.add('url-invalid');
+            }
+        }
+
+        // =============================================
+        // MÓDULO DE UPLOAD DE IMAGENS (OTIMIZADO)
+        // =============================================
+
+        // Configurações do carrossel
+        const CAROUSEL_CONFIG = {
+            MIN_IMAGES: 3,
+            MAX_IMAGES: 8,
+            AUTO_ADVANCE: false, // DESATIVADO conforme solicitado
+            AUTO_ADVANCE_INTERVAL: 5000
+        };
+
+        // Estado do carrossel
+        let carouselState = {
+            currentIndex: 0,
+            autoAdvanceInterval: null,
+            isUserInteracting: false
+        };
+
+        // Função otimizada para upload múltiplo de imagens
+        function handleMultipleImageUpload(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+            
+            const remainingSlots = CAROUSEL_CONFIG.MAX_IMAGES - siteData.carouselImages.length;
+            
+            if (remainingSlots <= 0) {
+                showCarouselMessage(`❌ Limite máximo de ${CAROUSEL_CONFIG.MAX_IMAGES} imagens atingido!`, 'error');
+                event.target.value = "";
+                return;
+            }
+            
+            const filesToProcess = Array.from(files).slice(0, remainingSlots);
+            
+            if (files.length > remainingSlots) {
+                showCarouselMessage(`⚠️ Apenas ${remainingSlots} imagens foram adicionadas (limite: ${CAROUSEL_CONFIG.MAX_IMAGES})`, 'warning');
+            }
+            
+            let processedCount = 0;
+            
+            filesToProcess.forEach((file) => {
+                // Validação do tipo de arquivo
+                if (!file.type.startsWith('image/')) {
+                    showCarouselMessage(`❌ "${file.name}" não é uma imagem válida`, 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    siteData.carouselImages.push({
+                        src: e.target.result,
+                        name: file.name,
+                        size: file.size
+                    });
+                    processedCount++;
+                    
+                    if (processedCount === filesToProcess.length) {
+                        updateCarouselPreview();
+                        batchUpdatePreview();
+                        validateCarouselCount();
+                        showCarouselMessage(`✅ ${processedCount} imagem(ns) adicionada(s) com sucesso!`, 'success');
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showCarouselMessage(`❌ Erro ao carregar "${file.name}"`, 'error');
+                };
+                
+                reader.readAsDataURL(file);
+            });
+            
+            event.target.value = "";
+        }
+
+        // Função para mostrar mensagens do carrossel
+        function showCarouselMessage(message, type = 'info') {
+            const messageElement = document.getElementById('carouselMessage') || createCarouselMessageElement();
+            
+            messageElement.textContent = message;
+            messageElement.className = `carousel-message ${type}`;
+            messageElement.style.display = 'block';
+            
+            // Auto-esconder mensagens de sucesso/info após 3 segundos
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    messageElement.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Criar elemento de mensagem se não existir
+        function createCarouselMessageElement() {
+            const existing = document.getElementById('carouselMessage');
+            if (existing) return existing;
+            
+            const messageElement = document.createElement('div');
+            messageElement.id = 'carouselMessage';
+            messageElement.className = 'carousel-message';
+            messageElement.style.cssText = `
+                display: none;
+                padding: 10px 15px;
+                border-radius: 8px;
+                margin: 10px 0;
+                font-size: 14px;
+                transition: all 0.3s ease;
+            `;
+            
+            const carouselFields = document.getElementById('carouselFields');
+            if (carouselFields) {
+                carouselFields.insertBefore(messageElement, carouselFields.firstChild);
+            }
+            
+            return messageElement;
+        }
+
+        // Validação melhorada da contagem do carrossel
+        function validateCarouselCount() {
+            const carouselError = getCachedElement('carouselError');
+            const carouselToggle = getCachedElement('carouselToggle');
+            
+            if (!carouselToggle.checked) {
+                hideValidationError(carouselError);
+                return true;
+            }
+            
+            const imageCount = siteData.carouselImages.length;
+            
+            if (imageCount < CAROUSEL_CONFIG.MIN_IMAGES) {
+                showValidationError(carouselError);
+                carouselError.textContent = `Selecione pelo menos ${CAROUSEL_CONFIG.MIN_IMAGES} imagens`;
+                return false;
+            } else if (imageCount > CAROUSEL_CONFIG.MAX_IMAGES) {
+                showValidationError(carouselError);
+                carouselError.textContent = `Máximo de ${CAROUSEL_CONFIG.MAX_IMAGES} imagens permitido`;
+                return false;
+            } else {
+                hideValidationError(carouselError);
+                return true;
+            }
+        }
+
+
+        // Preview do carrossel com melhorias - VERSÃO CORRIGIDA
+        function updateCarouselPreview() {
+            const previewGrid = getCachedElement('carouselPreviewGrid');
+            if (!previewGrid) return;
+            
+            previewGrid.innerHTML = '';
+            
+            // Mostrar contador - SEMPRE mostrar, mesmo no mobile
+            const counterElement = document.createElement('div');
+            counterElement.className = 'image-counter';
+            counterElement.textContent = `${siteData.carouselImages.length}/${CAROUSEL_CONFIG.MAX_IMAGES} imagens`;
+            counterElement.style.cssText = `
+                grid-column: 1 / -1;
+                text-align: center;
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 10px;
+                font-weight: 500;
+            `;
+            previewGrid.appendChild(counterElement);
+            
+            // Miniaturas das imagens
+            siteData.carouselImages.forEach((imgData, index) => {
+                const thumbContainer = document.createElement('div');
+                thumbContainer.style.position = 'relative';
+                thumbContainer.style.cursor = 'pointer';
+                
+                const thumb = document.createElement('img');
+                thumb.src = imgData.src;
+                thumb.className = 'preview-thumb';
+                thumb.alt = `Foto ${index + 1}`;
+                thumb.title = `Clique para visualizar\n${imgData.name}`;
+                
+                // Índice da imagem
+                const indexBadge = document.createElement('div');
+                indexBadge.className = 'image-index-badge';
+                indexBadge.textContent = index + 1;
+                indexBadge.style.cssText = `
+                    position: absolute;
+                    top: -5px;
+                    left: -5px;
+                    background: var(--primary-color);
+                    color: white;
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    font-size: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                `;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-image-btn';
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.title = 'Remover imagem';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeCarouselImage(index);
+                };
+                
+                // Preview em tamanho maior ao clicar
+                thumb.onclick = () => showImagePreview(imgData.src, index);
+                
+                thumbContainer.appendChild(thumb);
+                thumbContainer.appendChild(indexBadge);
+                thumbContainer.appendChild(removeBtn);
+                previewGrid.appendChild(thumbContainer);
+            });
+            
+            // 🔥 CORREÇÃO: SEMPRE mostrar o botão de adicionar se não atingiu o limite
+            // Isso resolve o problema do mobile onde o botão some
+            if (siteData.carouselImages.length < CAROUSEL_CONFIG.MAX_IMAGES) {
+                const addBtn = document.createElement('div');
+                addBtn.className = 'add-image-btn';
+                addBtn.innerHTML = '<i class="fas fa-plus"></i>';
+                addBtn.title = `Adicionar imagens (${CAROUSEL_CONFIG.MAX_IMAGES - siteData.carouselImages.length} restantes)`;
+                addBtn.onclick = () => {
+                    const input = getCachedElement('carouselMultipleInput');
+                    if (input) {
+                        // 🔥 IMPORTANTE: Resetar o input para permitir selecionar as mesmas imagens
+                        input.value = '';
+                        
+                        // Configurar para mobile
+                        if (isMobileDevice()) {
+                            setupMobileInput('gallery');
+                        } else {
+                            input.click();
+                        }
+                    }
+                };
+                previewGrid.appendChild(addBtn);
+            } else {
+                // Mostrar mensagem quando atingir o limite
+                const limitMessage = document.createElement('div');
+                limitMessage.className = 'limit-message';
+                limitMessage.textContent = `✅ Limite de ${CAROUSEL_CONFIG.MAX_IMAGES} imagens atingido`;
+                limitMessage.style.cssText = `
+                    grid-column: 1 / -1;
+                    text-align: center;
+                    padding: 10px;
+                    background: #d4edda;
+                    color: #155724;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    margin-top: 10px;
+                `;
+                previewGrid.appendChild(limitMessage);
+            }
+        }
+            
+        // Remover imagem com confirmação
+        function removeCarouselImage(index) {
+            if (siteData.carouselImages.length <= CAROUSEL_CONFIG.MIN_IMAGES) {
+                showCarouselMessage(`❌ Você precisa ter pelo menos ${CAROUSEL_CONFIG.MIN_IMAGES} imagens`, 'error');
+                return;
+            }
+            
+            const imageName = siteData.carouselImages[index].name;
+            
+            if (confirm(`Tem certeza que deseja remover "${imageName}"?`)) {
+                siteData.carouselImages.splice(index, 1);
+                updateCarouselPreview();
+                batchUpdatePreview();
+                validateCarouselCount();
+                showCarouselMessage('🗑️ Imagem removida', 'info');
+                autoSave();
+            }
+        }
+
+        // Configurar input baseado na origem (câmera ou galeria) - VERSÃO CORRIGIDA
+        function setupMobileInput(source) {
+            const input = getCachedElement('carouselMultipleInput');
+            if (!input) return;
+            
+            // 🔥 CORREÇÃO CRÍTICA: Sempre resetar o valor do input
+            // Isso permite selecionar imagens múltiplas vezes
+            input.value = '';
+            
+            // Limpar e reconfigurar atributos
+            input.removeAttribute('capture');
+            input.removeAttribute('accept');
+            
+            if (source === 'camera') {
+                // Para câmera: aceitar apenas imagens e usar câmera traseira
+                input.setAttribute('accept', 'image/*');
+                input.setAttribute('capture', 'environment');
+            } else {
+                // Para galeria: aceitar imagens sem forçar câmera
+                input.setAttribute('accept', 'image/*');
+                // SEM o atributo 'capture' - isso abre a galeria
+                input.removeAttribute('capture'); // Garantir que está removido
+            }
+            
+            // 🔥 CORREÇÃO: Usar setTimeout para garantir que o reset funcionou
+            setTimeout(() => {
+                try {
+                    input.click();
+                } catch (error) {
+                    console.log('Erro ao abrir seletor de arquivos:', error);
+                    // Fallback: mostrar mensagem amigável
+                    showCarouselMessage('📱 Toque novamente para selecionar imagens', 'info');
+                }
+            }, 300);
+        }
+
+
+
+        // Preview de imagem em tamanho maior
+        function showImagePreview(src, index) {
+            // Criar overlay modal simples
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                cursor: pointer;
+            `;
+            
+            const img = document.createElement('img');
+            img.src = src;
+            img.style.cssText = `
+                max-width: 90%;
+                max-height: 80%;
+                object-fit: contain;
+                border-radius: 8px;
+            `;
+            
+            const info = document.createElement('div');
+            info.textContent = `Imagem ${index + 1} de ${siteData.carouselImages.length}`;
+            info.style.cssText = `
+                color: white;
+                margin-top: 15px;
+                font-size: 16px;
+            `;
+            
+            const closeHint = document.createElement('div');
+            closeHint.textContent = 'Clique em qualquer lugar para fechar';
+            closeHint.style.cssText = `
+                color: #ccc;
+                margin-top: 10px;
+                font-size: 14px;
+            `;
+            
+            overlay.appendChild(img);
+            overlay.appendChild(info);
+            overlay.appendChild(closeHint);
+            
+            overlay.onclick = () => document.body.removeChild(overlay);
+            
+            document.body.appendChild(overlay);
+        }
+
+        // =============================================
+        // MÓDULO DE CAMPOS DINÂMICOS (OTIMIZADO)
+        // =============================================
+
+        function updateDeclarationFields() {
+            const container = getCachedElement('declarationFieldsContainer');
+            const count = siteData.elements.declarationsCount;
+            
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const existingData = siteData.declarations[i] || { title: "", text: "" };
+                
+                container.innerHTML += `
+                    <div class="field-group">
+                        <h4>Declaração ${i+1}</h4>
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" class="form-control declaration-title" value="${existingData.title}" placeholder="Título da declaração..." maxlength="30" oninput="handleDeclarationChange()">
+                        </div>
+                        <div class="form-group">
+                            <label>Texto</label>
+                            <textarea class="form-control declaration-text" placeholder="Escreva sua declaração de amor aqui..." maxlength="300" oninput="handleDeclarationChange()">${existingData.text}</textarea>
+                            <small style="color: #666;">Máximo 300 caracteres</small>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function handleDeclarationChange() {
+            const titles = document.querySelectorAll('.declaration-title');
+            const texts = document.querySelectorAll('.declaration-text');
+            siteData.declarations = Array.from(titles).map((title, i) => ({
+                title: title.value,
+                text: texts[i]?.value || ""
+            }));
+            batchUpdatePreview();
+        }
+
+        function updatePlanFields() {
+            const container = getCachedElement('plansContainer');
+            const count = siteData.elements.plansCount;
+            
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const existingData = siteData.plans[i] || { icon: "❤️", title: "", text: "" };
+                
+                container.innerHTML += `
+                    <div class="field-group">
+                        <h4>Plano ${i+1}</h4>
+                        <div class="form-group">
+                            <label>Emoji</label>
+                            <input type="text" class="form-control plan-emoji emoji-input" value="${existingData.icon}" maxlength="2" oninput="handlePlanChange()">
+                        </div>
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" class="form-control plan-title" value="${existingData.title}" placeholder="Título do plano..." maxlength="20" oninput="handlePlanChange()">
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <textarea class="form-control plan-text" placeholder="Descreva seu plano especial..." maxlength="200" oninput="handlePlanChange()">${existingData.text}</textarea>
+                            <small style="color: #666;">Máximo 200 caracteres</small>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function handlePlanChange() {
+            const icons = document.querySelectorAll('.plan-emoji');
+            const titles = document.querySelectorAll('.plan-title');
+            const texts = document.querySelectorAll('.plan-text');
+            siteData.plans = Array.from(icons).map((icon, i) => ({
+                icon: icon.value || "❤️",
+                title: titles[i]?.value || "",
+                text: texts[i]?.value || ""
+            }));
+            batchUpdatePreview();
+        }
+
+        // =============================================
+        // CONTROLE DE PROMESSAS COM LIMITE
+        // =============================================
+
+        const MAX_PROMISES = 10;
+        let currentPromisesCount = 0;
+
+        function addPromise() {
+            if (currentPromisesCount >= MAX_PROMISES) {
+                alert(`❌ Limite máximo de ${MAX_PROMISES} promessas atingido!`);
+                return;
+            }
+            
+            siteData.promises.push("");
+            currentPromisesCount++;
+            updatePromiseFields();
+            updatePromiseCounter();
+            batchUpdatePreview();
+            autoSave(); // ← Importante salvar automaticamente
+        }
+
+        function removePromise(index) {
+            siteData.promises.splice(index, 1);
+            currentPromisesCount--;
+            updatePromiseFields();
+            updatePromiseCounter();
+            batchUpdatePreview();
+            autoSave(); // ← Importante salvar automaticamente
+        }
+
+        function updatePromiseCounter() {
+            const counter = document.getElementById('promiseCounter');
+            const addButton = document.getElementById('addPromiseBtn');
+            
+            if (counter) {
+                counter.textContent = `(${currentPromisesCount}/${MAX_PROMISES})`;
+            }
+            
+            // Desabilitar botão se atingiu o limite
+            if (addButton) {
+                addButton.disabled = currentPromisesCount >= MAX_PROMISES;
+                if (addButton.disabled) {
+                    addButton.style.opacity = '0.6';
+                    addButton.style.cursor = 'not-allowed';
+                } else {
+                    addButton.style.opacity = '1';
+                    addButton.style.cursor = 'pointer';
+                }
+            }
+        }
+
+        function updatePromiseFields() {
+            const container = getCachedElement('promisesContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            siteData.promises.forEach((promise, index) => {
+                container.innerHTML += `
+                    <div class="promise-item-editor">
+                        <input type="text" class="form-control promise-input" 
+                            value="${promise}" 
+                            placeholder="Digite uma promessa..." 
+                            maxlength="60" 
+                            oninput="handlePromiseChange()">
+                        <button type="button" class="remove-btn" onclick="removePromise(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            // Atualizar contador após renderizar
+            currentPromisesCount = siteData.promises.length;
+            updatePromiseCounter();
+        }
+
+        function handlePromiseChange() {
+            const promiseInputs = document.querySelectorAll('.promise-input');
+            siteData.promises = Array.from(promiseInputs).map(input => input.value);
+            batchUpdatePreview();
+            autoSave(); // ← Importante salvar automaticamente
+        }
+        // =============================================
+        // FUNÇÕES ORIGINAIS MANTIDAS (RESUMO)
+        // =============================================
+
+        // Funções originais mantidas para funcionalidade completa
+        function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (type === 'mainImage') {
+                        siteData.mainImage = e.target.result;
+                        document.getElementById('mainImagePreview').src = siteData.mainImage;
+                        document.getElementById('mainImagePreview').style.display = 'block';
+                        batchUpdatePreview();
+                        autoSave();
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updatePreview() {
+            // SUA FUNÇÃO updatePreview ORIGINAL AQUI
+            // Mantida intacta para preservar funcionalidades
+            const screen = document.getElementById('phoneScreen');
+            
+            // CALCULA CORES SECUNDÁRIAS BASEADO NA COR PRIMÁRIA
+            const colors = calculateSecondaryColor(siteData.primaryColor);
+            const secondaryColor = colors.secondary;
+            const lightPink = colors.light;
+            
+            // APLICA AS CORES DIRETAMENTE NO PREVIEW
+            screen.style.setProperty('--primary-color', siteData.primaryColor);
+            screen.style.setProperty('--secondary-color', secondaryColor);
+            screen.style.setProperty('--light-pink', lightPink);
+            screen.style.setProperty('--background-color', siteData.backgroundColor);
+            
+            const timeTogether = calculateTimeTogether();
+            
+            let previewHTML = `<div class="preview-site">`;
+            
+            // Ícone de música dentro do preview - COM COR ATUALIZADA
+            if (siteData.elements.music && siteData.elements.musicUrl) {
+                previewHTML += `
+                    <button class="preview-music-control" style="background: ${siteData.primaryColor}; color: white;" onclick="toggleMusic()">❚❚</button>
+                `;
+            }
+            
+            // Card Principal - COM CORES ATUALIZADAS
+            previewHTML += `
+                <div class="card">
+                    <div class="image-container" style="background: ${siteData.mainImage ? `url('${siteData.mainImage}')` : lightPink} center/cover no-repeat;"></div>
+                    ${siteData.mainTitle ? `<h1 class="title" style="color: white; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);">${siteData.mainTitle}</h1>` : ''}
+                    ${siteData.mainMessage ? `
+                        <p class="message" style="color: #555;">
+                            ${siteData.mainMessage.replace(/\n/g, '<br>')}
+                        </p>
+                    ` : ''}
+                    <div class="heart" style="color: ${secondaryColor};">❤</div>
+                </div>
+            `;
+
+            // Declarações - COM CORES ATUALIZADAS
+            if (siteData.elements.declarations && siteData.declarations && siteData.declarations.length > 0) {
+                const validDeclarations = siteData.declarations.filter(dec => dec.title || dec.text);
+                
+                if (validDeclarations.length > 0) {
+                    previewHTML += `
+                        <section class="declarations">
+                            ${validDeclarations.map(declaration => `
+                                <div class="declaration-card">
+                                    <h2 class="declaration-title" style="color: ${siteData.primaryColor};">${declaration.title}</h2>
+                                    <p class="declaration-text">${declaration.text}</p>
+                                </div>
+                            `).join('')}
+                        </section>
+                    `;
+                }
+            }
+
+            // Carrossel - COM CORES ATUALIZADAS
+            if (siteData.elements.carousel && siteData.carouselImages && siteData.carouselImages.length >= CAROUSEL_CONFIG.MIN_IMAGES) {
+                previewHTML += `
+                    <div class="carousel-container">
+                        <div class="carousel">
+                            ${siteData.carouselImages.map((imgData, i) => `
+                                <div class="carousel-slide">
+                                    <img src="${imgData.src}" alt="Foto ${i+1}" class="carousel-image" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="carousel-btn prev-btn" style="left: 10px; background: rgba(255, 255, 255, 0.7); color: ${siteData.primaryColor};" title="Imagem anterior">❮</button>
+                        <button class="carousel-btn next-btn" style="right: 10px; background: rgba(255, 255, 255, 0.7); color: ${siteData.primaryColor};" title="Próxima imagem">❯</button>
+                        <div class="carousel-indicators">
+                            ${siteData.carouselImages.map((_, i) => `
+                                <span class="indicator ${i === 0 ? 'active' : ''}" data-index="${i}"></span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Planos - COM CORES ATUALIZADAS
+            if (siteData.elements.plans && siteData.plans && siteData.plans.length > 0) {
+                const validPlans = siteData.plans.filter(plan => plan.title || plan.text);
+                
+                if (validPlans.length > 0) {
+                    previewHTML += `
+                        <div class="section-divider" style="color: ${siteData.primaryColor};">${siteData.elements.plansTitle || 'Nossos Planos'}</div>
+                        <div class="plans-section">
+                            <div class="plans-grid">
+                                ${validPlans.map(plan => `
+                                    <div class="plan-item visible">
+                                        <div class="plan-icon" style="color: ${secondaryColor};">${plan.icon || "❤️"}</div>
+                                        <h3 class="plan-title" style="color: ${siteData.primaryColor};">${plan.title}</h3>
+                                        <p class="plan-text">${plan.text}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Promessas - COM CORES ATUALIZADAS
+            if (siteData.elements.promises && siteData.promises && siteData.promises.length > 0) {
+                const validPromises = siteData.promises.filter(promise => promise && promise.trim() !== "");
+                
+                if (validPromises.length > 0) {
+                    previewHTML += `
+                        <section class="promises">
+                            <h2 class="promises-title" style="color: ${siteData.primaryColor};">${siteData.elements.promisesTitle || 'Minhas Promessas'}</h2>
+                            ${validPromises.map(promise => `
+                                <div class="promise-item">${promise}</div>
+                            `).join('')}
+                        </section>
+                    `;
+                }
+            }
+
+            // Vídeo - COM SISTEMA CORRIGIDO PARA ERRO 153
+            if (siteData.elements.video && siteData.elements.videoUrl) {
+                const videoId = extractYouTubeId(siteData.elements.videoUrl);
+                if (videoId) {
+                    previewHTML += `
+                        <div class="section-divider" style="color: ${siteData.primaryColor};">${siteData.elements.videoMessage || 'Nossos Momentos'}</div>
+                        <div class="video-section">
+                            <div class="video-wrapper">
+                                <iframe 
+                                    width="100%" 
+                                    height="180" 
+                                    src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}"
+                                    frameborder="0" 
+                                    allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowfullscreen
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    title="Vídeo do YouTube">
+                                </iframe>
+                            </div>
+                            <p class="video-message" style="color: ${siteData.primaryColor};">${siteData.elements.videoMessage || 'Nossos Momentos'}</p>
+                        </div>
+                    `;
+                } else if (siteData.elements.videoUrl.trim() !== '') {
+                    previewHTML += `
+                        <div class="section-divider" style="color: ${siteData.primaryColor};">${siteData.elements.videoMessage || 'Nossos Momentos'}</div>
+                        <div class="video-section">
+                            <div class="video-error" style="text-align: center; padding: 20px; color: #dc3545; background: #f8d7da; border-radius: 8px;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                                <p>Link do YouTube inválido</p>
+                                <small style="font-size: 12px;">Use: youtube.com/watch?v=... ou youtu.be/...</small>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Música - player oculto com sistema corrigido
+            if (siteData.elements.music && siteData.elements.musicUrl) {
+                const musicId = extractYouTubeId(siteData.elements.musicUrl);
+                if (musicId) {
+                    previewHTML += `
+                        <div id="music-player" style="display: none;">
+                            <iframe 
+                                width="0" 
+                                height="0" 
+                                src="https://www.youtube.com/embed/${musicId}?autoplay=1&loop=1&playlist=${musicId}&controls=0&modestbranding=1&rel=0&enablejsapi=1&origin=${window.location.origin}"
+                                frameborder="0" 
+                                allow="autoplay"
+                                id="music-iframe"
+                                title="Música de fundo">
+                            </iframe>
+                        </div>
+                    `;
+                    // Resetar estado da música quando uma nova for carregada
+                    isMusicPlaying = true;
+                } else if (siteData.elements.musicUrl.trim() !== '') {
+                    // Mostrar erro apenas se houver texto no campo
+                    previewHTML += `
+                        <div style="display: none;">
+                            <div class="music-error" style="text-align: center; padding: 10px; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 10px;">
+                                <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                                Link de música inválido
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Contador de Tempo - COM CORES ATUALIZADAS
+            if (siteData.elements.counter && siteData.startDate) {
+                previewHTML += `
+                    <div class="simple-counter">
+                        <p style="color: ${siteData.primaryColor};">${siteData.elements.counterText} <span id="simple-years" style="color: ${secondaryColor};">${timeTogether.years}</span> anos, <span id="simple-months" style="color: ${secondaryColor};">${timeTogether.months}</span> meses e <span id="simple-days" style="color: ${secondaryColor};">${timeTogether.days}</span> dias ❤️</p>
+                    </div>
+                `;
+            }
+
+            // Mensagem de preview vazio - COM CORES ATUALIZADAS
+            if (previewHTML === `<div class="preview-site">`) {
+                previewHTML += `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #999; text-align: center; padding: 20px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">💕</div>
+                        <h3 style="color: ${siteData.primaryColor}; margin-bottom: 10px; font-family: 'Dancing Script', cursive;">Seu Site de Amor</h3>
+                        <p>Comece a preencher o formulário ao lado para ver sua declaração ganhar vida!</p>
+                        <p style="font-size: 12px; margin-top: 20px;">Cada elemento aparecerá aqui conforme você for preenchendo</p>
+                    </div>
+                `;
+            }
+
+            previewHTML += `</div>`;
+            screen.innerHTML = previewHTML;
+
+            // Inicializar componentes interativos do preview
+            if (siteData.elements.carousel && siteData.carouselImages.length >= 3 && document.querySelector('.carousel')) {
+                initCarousel();
+            }
+
+            if (document.querySelectorAll('.plan-item').length > 0) {
+                initPlanAnimation();
+            }
+
+            // Iniciar/Parar efeito de pétalas
+            togglePetalsEffect();
+        }
+
+        function calculateSecondaryColor(primaryColor) {
+            // Se for preto ou cores muito escuras, usa tons cinza
+            if (primaryColor === '#000000' || primaryColor === '#000') {
+                return { 
+                    secondary: '#333333', 
+                    light: '#ffb6c1'
+                };
+            }
+            if (primaryColor === '#333333') {
+                return { 
+                    secondary: '#555555', 
+                    light: '#ffb6c1' 
+                };
+            }
+            
+            // Para cores hex, calcula cores mais claras
+            try {
+                const hex = primaryColor.replace('#', '');
+                if (hex.length === 3) {
+                    // Converte #abc para #aabbcc
+                    const r = parseInt(hex[0] + hex[0], 16);
+                    const g = parseInt(hex[1] + hex[1], 16);
+                    const b = parseInt(hex[2] + hex[2], 16);
+                    
+                    const secondaryR = Math.min(255, r + 40);
+                    const secondaryG = Math.min(255, g + 40);
+                    const secondaryB = Math.min(255, b + 40);
+                    
+                    return {
+                        secondary: `rgb(${secondaryR}, ${secondaryG}, ${secondaryB})`,
+                        light: `rgb(${Math.min(255, r + 80)}, ${Math.min(255, g + 80)}, ${Math.min(255, b + 80)})`
+                    };
+                } else if (hex.length === 6) {
+                    const r = parseInt(hex.substr(0, 2), 16);
+                    const g = parseInt(hex.substr(2, 2), 16);
+                    const b = parseInt(hex.substr(4, 2), 16);
+                    
+                    const secondaryR = Math.min(255, r + 40);
+                    const secondaryG = Math.min(255, g + 40);
+                    const secondaryB = Math.min(255, b + 40);
+                    
+                    const lightR = Math.min(255, r + 80);
+                    const lightG = Math.min(255, g + 80);
+                    const lightB = Math.min(255, b + 80);
+                    
+                    return {
+                        secondary: `rgb(${secondaryR}, ${secondaryG}, ${secondaryB})`,
+                        light: `rgb(${lightR}, ${lightG}, ${lightB})`
+                    };
+                }
+            } catch (e) {
+                console.error('Erro ao calcular cor:', e);
+            }
+            
+            // Fallback para cores que não conseguimos calcular
+            return { 
+                secondary: '#ff6b81', 
+                light: '#ffb6c1' 
+            };
+        }
+
+        function calculateTimeTogether() {
+            if (!siteData.startDate) return { years: 0, months: 0, days: 0 };
+            
+            const startDate = new Date(siteData.startDate);
+            const now = new Date();
+            
+            let years = now.getFullYear() - startDate.getFullYear();
+            let months = now.getMonth() - startDate.getMonth();
+            let days = now.getDate() - startDate.getDate();
+            
+            if (days < 0) {
+                months--;
+                days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+            }
+            
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            return { years, months, days };
+        }
+
+        // Carrossel interativo no preview - SEM AUTOMÁTICO
+        function initCarousel() {
+            const carousel = document.querySelector('.carousel');
+            const slides = document.querySelectorAll('.carousel-slide');
+            const prevBtn = document.querySelector('.carousel-btn.prev-btn');
+            const nextBtn = document.querySelector('.carousel-btn.next-btn');
+            const indicators = document.querySelectorAll('.carousel-indicators .indicator');
+            
+            if (!carousel || !slides.length) return;
+            
+            // Parar qualquer intervalo anterior
+            stopAutoAdvance();
+            
+            function updateCarousel() {
+                carousel.style.transform = `translateX(-${carouselState.currentIndex * 100}%)`;
+                
+                // Atualizar indicadores
+                indicators.forEach((indicator, index) => {
+                    indicator.classList.toggle('active', index === carouselState.currentIndex);
+                });
+            }
+            
+            function goToSlide(index) {
+                carouselState.currentIndex = index;
+                updateCarousel();
+            }
+            
+            function nextSlide() {
+                carouselState.currentIndex = (carouselState.currentIndex + 1) % slides.length;
+                updateCarousel();
+            }
+            
+            function prevSlide() {
+                carouselState.currentIndex = (carouselState.currentIndex - 1 + slides.length) % slides.length;
+                updateCarousel();
+            }
+            
+            // Event listeners para botões
+            if (nextBtn) {
+                nextBtn.onclick = nextSlide;
+            }
+            
+            if (prevBtn) {
+                prevBtn.onclick = prevSlide;
+            }
+            
+            // Event listeners para indicadores
+            indicators.forEach((indicator, index) => {
+                indicator.onclick = () => goToSlide(index);
+            });
+            
+            // Navegação por teclado
+            document.addEventListener('keydown', (e) => {
+                if (!carousel.parentNode) return; // Só funciona se o carrossel estiver visível
+                
+                if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                } else if (e.key === 'ArrowRight') {
+                    nextSlide();
+                }
+            });
+            
+            // Swipe para mobile
+            let startX = 0;
+            let endX = 0;
+            
+            carousel.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+            }, { passive: true });
+            
+            carousel.addEventListener('touchend', (e) => {
+                endX = e.changedTouches[0].clientX;
+                handleSwipe();
+            }, { passive: true });
+            
+            function handleSwipe() {
+                const diff = startX - endX;
+                const swipeThreshold = 50;
+                
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        nextSlide(); // Swipe para esquerda
+                    } else {
+                        prevSlide(); // Swipe para direita
+                    }
+                }
+            }
+            
+            // Inicializar na primeira imagem
+            carouselState.currentIndex = 0;
+            updateCarousel();
+        }
+
+// Funções de auto-advance (mantidas mas desativadas)
+function startAutoAdvance() {
+    if (!CAROUSEL_CONFIG.AUTO_ADVANCE) return;
+    
+    stopAutoAdvance();
+    carouselState.autoAdvanceInterval = setInterval(() => {
+        if (!carouselState.isUserInteracting) {
+            const carousel = document.querySelector('.carousel');
+            const slides = document.querySelectorAll('.carousel-slide');
+            if (carousel && slides.length > 0) {
+                carouselState.currentIndex = (carouselState.currentIndex + 1) % slides.length;
+                carousel.style.transform = `translateX(-${carouselState.currentIndex * 100}%)`;
+            }
+        }
+    }, CAROUSEL_CONFIG.AUTO_ADVANCE_INTERVAL);
+}
+
+function stopAutoAdvance() {
+    if (carouselState.autoAdvanceInterval) {
+        clearInterval(carouselState.autoAdvanceInterval);
+        carouselState.autoAdvanceInterval = null;
+    }
+}
+
+        function initPlanAnimation() {
+            const planItems = document.querySelectorAll('.plan-item');
+            planItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('visible');
+                }, index * 200);
+            });
+        }
+
+        function toggleMusic() {
+            const musicPlayer = document.getElementById('music-player');
+            if (!musicPlayer) {
+                alert('🎵 Nenhuma música carregada');
+                return;
+            }
+            
+            musicIframe = musicPlayer.querySelector('iframe');
+            if (!musicIframe) {
+                alert('🎵 Player de música não encontrado');
+                return;
+            }
+            
+            try {
+                if (isMusicPlaying) {
+                    // Pausar música
+                    musicIframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                    document.querySelector('.preview-music-control').innerHTML = '♪';
+                    isMusicPlaying = false;
+                } else {
+                    // Retomar música
+                    musicIframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                    document.querySelector('.preview-music-control').innerHTML = '❚❚';
+                    isMusicPlaying = true;
+                }
+            } catch (error) {
+                console.log('Controle de música requer interação do usuário primeiro');
+                alert('▶️ Clique no vídeo da música primeiro para ativar o controle');
+            }
+        }
+
+        function updateSimpleCounter() {
+            if (!siteData.startDate) return;
+            
+            const startDate = new Date(siteData.startDate);
+            const now = new Date();
+            
+            let years = now.getFullYear() - startDate.getFullYear();
+            let months = now.getMonth() - startDate.getMonth();
+            let days = now.getDate() - startDate.getDate();
+            
+            if (days < 0) {
+                months--;
+                days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+            }
+            
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            // Atualizar elementos no preview se existirem
+            const yearsElement = document.getElementById('simple-years');
+            const monthsElement = document.getElementById('simple-months');
+            const daysElement = document.getElementById('simple-days');
+            
+            if (yearsElement) yearsElement.textContent = years;
+            if (monthsElement) monthsElement.textContent = months;
+            if (daysElement) daysElement.textContent = days;
+        }
+
+        function createPetal() {
+            if (!siteData.elements.petals) return;
+            
+            const screen = document.getElementById('phoneScreen');
+            if (!screen) return;
+            
+            const petal = document.createElement('div');
+            petal.innerHTML = siteData.elements.petalsEmoji || '🌸';
+            petal.style.position = 'absolute';
+            petal.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            petal.style.left = Math.random() * 100 + '%';
+            petal.style.top = '-50px';
+            petal.style.opacity = Math.random() * 0.7 + 0.3;
+            petal.style.animation = `fall ${Math.random() * 5 + 5}s linear infinite`;
+            petal.style.zIndex = '1';
+            petal.style.pointerEvents = 'none';
+            
+            screen.appendChild(petal);
+            
+            setTimeout(() => {
+                if (petal.parentNode) {
+                    petal.parentNode.removeChild(petal);
+                }
+            }, 4000);
+        }
+
+        function togglePetalsEffect() {
+            // Limpar intervalo anterior
+            if (petalsInterval) {
+                clearInterval(petalsInterval);
+                petalsInterval = null;
+            }
+            
+            // Remover pétalas existentes
+            const screen = document.getElementById('phoneScreen');
+            if (screen) {
+                const existingPetals = screen.querySelectorAll('div[style*="animation: fall"]');
+                existingPetals.forEach(petal => petal.remove());
+            }
+            
+            // Adicionar estilo CSS para animação se não existir
+            if (!document.getElementById('petals-style')) {
+                const style = document.createElement('style');
+                style.id = 'petals-style';
+                style.innerHTML = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(800px) rotate(360deg);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Iniciar novo intervalo se o efeito estiver ativo
+            if (siteData.elements.petals) {
+                petalsInterval = setInterval(createPetal, 500);
+            }
+        }
+
+        function updateBackgroundColor(color) {
+            siteData.backgroundColor = color;
+            document.getElementById('backgroundColorCode').textContent = color;
+            batchUpdatePreview();
+            autoSave();
+        }
+
+        function updatePrimaryColor(color) {
+            siteData.primaryColor = color;
+            document.getElementById('primaryColorCode').textContent = color;
+            batchUpdatePreview();
+            autoSave();
+        }
+
+        function handleSubmit() {
+            try {
+                saveCurrentStep();
+                
+                if (!siteData.pageName || !siteData.mainTitle || !siteData.mainMessage) {
+                    alert('❌ Preencha pelo menos: URL, Título e Mensagem Principal');
+                    showStep(1);
+                    return;
+                }
+
+                const btnFinalizar = document.querySelector('.btn-success');
+                const originalText = btnFinalizar.innerHTML;
+                btnFinalizar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                btnFinalizar.disabled = true;
+
+                console.log('Salvando dados localmente:', siteData);
+
+                const siteId = 'site-' + Date.now();
+                const siteToSave = {
+                    id: siteId,
+                    ...siteData,
+                    createdAt: new Date().toISOString(),
+                    link: `zairis.com/${siteData.pageName}`
+                };
+
+                localStorage.setItem(siteId, JSON.stringify(siteToSave));
+                localStorage.setItem('lastCreatedSite', siteId);
+
+                // Limpar dados de autosave após finalização
+                clearSavedData();
+
+                setTimeout(() => {
+                    const mensagemSucesso = `🎉 Site salvo com sucesso!\n\n🔗 Link simulado: zairis.com/${siteData.pageName}\n\n📱 Dados salvos localmente para desenvolvimento.\n\n💡 Em produção, isso enviaria para o servidor.`;
+                    
+                    alert(mensagemSucesso);
+                    
+                    try {
+                        navigator.clipboard.writeText(`zairis.com/${siteData.pageName}`);
+                        console.log('✅ Link simulado copiado para área de transferência!');
+                    } catch (err) {
+                        console.log('ℹ️ Não foi possível copiar o link automaticamente');
+                    }
+                    
+                    btnFinalizar.innerHTML = '<i class="fas fa-rocket"></i> Finalizar e Salvar';
+                    btnFinalizar.disabled = false;
+
+                    console.log('📦 Dados prontos para envio ao backend:', siteToSave);
+
+                }, 1500);
+
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                alert('❌ Erro ao salvar localmente. Verifique o console para detalhes.');
+                
+                const btnFinalizar = document.querySelector('.btn-success');
+                if (btnFinalizar) {
+                    btnFinalizar.innerHTML = '<i class="fas fa-rocket"></i> Finalizar e Salvar';
+                    btnFinalizar.disabled = false;
+                }
+            }
+        }
+
+        // =============================================
+        // EVENT LISTENERS OTIMIZADOS
+        // =============================================
+
+        // Inicialização otimizada
+        function initializeEventListeners() {
+            // Upload de imagens
+            getCachedElement('mainImageUpload').addEventListener('click', () => {
+                getCachedElement('mainImageInput').click();
+            });
+
+            getCachedElement('mainImageInput').addEventListener('change', function(e) {
+                handleImageUpload(e, 'mainImage');
+            });
+
+            getCachedElement('carouselMultipleUpload').addEventListener('click', () => {
+                getCachedElement('carouselMultipleInput').click();
+            });
+
+            getCachedElement('carouselMultipleInput').addEventListener('change', handleMultipleImageUpload);
+
+            // Validação em tempo real para campos obrigatórios
+            const requiredFields = [
+                { input: 'pageName', error: 'pageNameError' },
+                { input: 'mainTitle', error: 'mainTitleError' },
+                { input: 'mainMessage', error: 'mainMessageError' }
+            ];
+
+            requiredFields.forEach(({ input, error }) => {
+                const inputElement = getCachedElement(input);
+                const errorElement = getCachedElement(error);
+                
+                if (inputElement && errorElement) {
+                    inputElement.addEventListener('input', () => {
+                        validateRequiredField(inputElement, errorElement);
+                        // Salvar automaticamente ao digitar
+                        autoSave();
+                    });
+                    
+                    // Adicionar validação ao perder o foco também
+                    inputElement.addEventListener('blur', () => {
+                        validateRequiredField(inputElement, errorElement);
+                    });
+                }
+            });
+
+            // Outros event listeners
+            const eventHandlers = {
+                'pageName': function() {
+                    siteData.pageName = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+                    getCachedElement('url-preview').textContent = siteData.pageName;
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'mainTitle': function() {
+                    siteData.mainTitle = this.value;
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'mainMessage': function() {
+                    siteData.mainMessage = this.value;
+                    getCachedElement('mainMessageCount').textContent = this.value.length;
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'plansTitle': function() {
+                    siteData.elements.plansTitle = this.value;
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'promisesTitle': function() {
+                    siteData.elements.promisesTitle = this.value;
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'counterText': function() {
+                    siteData.elements.counterText = this.value;
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'counterDate': function() {
+                    siteData.startDate = this.value;
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'videoUrl': function() {
+                    siteData.elements.videoUrl = this.value;
+                    validateVideoUrl();
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'videoMessage': function() {
+                    siteData.elements.videoMessage = this.value;
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'musicUrl': function() {
+                    siteData.elements.musicUrl = this.value;
+                    validateMusicUrl();
+                    batchUpdatePreview();
+                    autoSave();
+                },
+                'petalsEmoji': function() {
+                    siteData.elements.petalsEmoji = this.value;
+                    batchUpdatePreview();
+                    autoSave();
+                }
+            };
+
+            Object.entries(eventHandlers).forEach(([id, handler]) => {
+                const element = getCachedElement(id);
+                if (element) {
+                    element.addEventListener('input', handler);
+                }
+            });
+
+            // Toggles
+            const toggles = [
+                'declarationsToggle', 'carouselToggle', 
+                'plansToggle', 'promisesToggle', 'videoToggle', 'musicToggle',
+                'counterToggle', 'petalsToggle'
+            ];
+            
+            toggles.forEach(toggleId => {
+                const element = getCachedElement(toggleId);
+                if (element) {
+                    element.addEventListener('change', function() {
+                        const elementKey = toggleId.replace('Toggle', '');
+                        siteData.elements[elementKey] = this.checked;
+                        batchUpdatePreview();
+                        autoSave();
+                    });
+                }
+            });
+
+            // Controles de quantidade
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('counter-btn')) {
+                    const container = e.target.closest('.counter-controls');
+                    const count = parseInt(e.target.dataset.count);
+                    const section = container.closest('.optional-section');
+                    const type = section.querySelector('label').textContent.trim();
+                    
+                    container.querySelectorAll('.counter-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    e.target.classList.add('active');
+                    
+                    if (type.includes('Declarações')) {
+                        siteData.elements.declarationsCount = count;
+                        updateDeclarationFields();
+                    } else if (type.includes('Planos')) {
+                        siteData.elements.plansCount = count;
+                        updatePlanFields();
+                    }
+                    
+                    batchUpdatePreview();
+                    autoSave();
+                }
+            });
+
+            // Modal de restauração
+            getCachedElement('restoreYes').addEventListener('click', () => {
+                const result = restoreSavedData();
+                if (result.success) {
+                    showStep(result.step || currentStep);
+                }
+                hideRestoreModal();
+            });
+
+            getCachedElement('restoreNo').addEventListener('click', () => {
+                clearSavedData();
+                hideRestoreModal();
+                showStep(1);
+
+                location.reload();       // 🔄 atualiza a página automaticamente
+            });
+
+        }
+
+        // =============================================
+        // INICIALIZAÇÃO DO SISTEMA
+        // =============================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar cache
+            initializeEventListeners();
+            
+            // Verificar se há dados salvos
+            setTimeout(() => {
+                const savedData = restoreSavedData();
+                if (savedData.success) {
+                    showRestoreModal();
+                } else {
+                    showStep(1);
+                }
+            }, 100);
+            
+            // Inicializar componentes
+            updateDeclarationFields();
+            updatePlanFields();
+            updatePromiseFields();
+            updateProgressBar();
+            batchUpdatePreview();
+            
+            getCachedElement('mainMessageCount').textContent = siteData.mainMessage.length;
+            
+            // Iniciar atualização do contador em tempo real
+            setInterval(updateSimpleCounter, 1000);
+            
+            // Inicializar validação dos URLs
+            validateVideoUrl();
+            validateMusicUrl();
+            
+            // Salvar automaticamente periodicamente (a cada 30 segundos)
+            setInterval(autoSave, 30000);
+
+                // Melhorar o input de upload para mobile
+                const carouselInput = getCachedElement('carouselMultipleInput');
+                if (carouselInput) {
+                    // Atributos para melhor compatibilidade mobile
+                    carouselInput.setAttribute('accept', 'image/*');
+                    carouselInput.setAttribute('capture', 'environment'); // Para câmera traseira
+                    carouselInput.setAttribute('multiple', 'true');
+                }
+                
+                // Inicializar carrossel se houver imagens
+                if (siteData.carouselImages.length >= CAROUSEL_CONFIG.MIN_IMAGES) {
+                    setTimeout(initCarousel, 100);
+                }
+        });
+    </script>
+</body>
+</html>
