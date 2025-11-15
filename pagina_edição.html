@@ -2725,15 +2725,16 @@
             
             const imageName = siteData.carouselImages[index].name;
             
-            if (confirm(`Tem certeza que deseja remover "${imageName}"?`)) {
+            if (confirm(`Tem certeza que deseja remover essa imagem?`)) {
                 siteData.carouselImages.splice(index, 1);
                 updateCarouselPreview();
                 batchUpdatePreview();
                 validateCarouselCount();
-                showCarouselMessage('🗑️ Imagem removida', 'info');
+                showCarouselMessage('Imagem removida', 'info');
                 autoSave();
             }
         }
+
 
         // Configurar input baseado na origem (câmera ou galeria) - VERSÃO CORRIGIDA
         function setupMobileInput(source) {
@@ -3878,3 +3879,4 @@ function stopAutoAdvance() {
 </body>
 
 </html>
+
